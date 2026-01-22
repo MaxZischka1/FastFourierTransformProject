@@ -7,7 +7,7 @@ module uart_rx(
 );
 
 
-typedef enum  logic[1:0]{  
+typedef enum  logic[1:0]{  //state machine
     Idle,
     Start,
     Transmitting,
@@ -20,7 +20,7 @@ states state, next_state;
 
 logic [7:0] counter;
 
-always_comb begin : stateMachine
+always_comb begin : stateMachine //change state logic
     next_state = state;
     case(state)
         Idle:begin
@@ -41,7 +41,7 @@ always_comb begin : stateMachine
     endcase
 end
 
-always_ff @(posedge clock or posedge clr) begin
+always_ff @(posedge clock or posedge clr) begin //sutff todo in states
     realCounter <= realCounter + 1;
     if(clr) begin
         state <= Idle;

@@ -10,7 +10,7 @@
                 "isDefault": true
             },
             "problemMatcher": [],
-            "detail": "Compiles, runs, and opens GTKWave"
+            "detail": "Compiles, runs, and opens GTKWave" 
         }
     ]
 }
