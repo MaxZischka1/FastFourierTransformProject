@@ -6,13 +6,15 @@ module uart_rx_tb;
     logic clock;
     logic[7:0] data;
     logic [15:0] realCounter;
+    logic done;
 
     uart_rx dut (
         .rx(rx),
         .clr(clr),
         .clock(clock),
         .data(data),
-        .realCounter(realCounter)
+        .realCounter(realCounter),
+        .done(done)
     );
 
     initial begin
@@ -37,8 +39,33 @@ module uart_rx_tb;
          #868;
          rx = 1;
          #868;
+         rx = 1;
+         #868;
+         rx = 1;
+         #868
+         rx = 0;
+         #868
+         rx = 0;
+         #868
+         rx = 1;
+         #868
+         rx = 1;
+         #868
+         rx = 0;
+         #868
+         //STOOP
+         rx = 1;
+         #2000
          rx = 0;
          #868;
+         rx = 1;
+         #868;
+         rx = 1;
+         #868;
+         rx = 1;
+         #868
+         rx = 1;
+         #868
          rx = 0;
          #868
          rx = 1;
@@ -47,16 +74,8 @@ module uart_rx_tb;
          #868
          rx = 1;
          #868
-         rx = 0;
-         #868
-         rx = 0;
-         #868
-         rx = 0;
-         #868
          rx = 1;
-         #1000
-         //Should output 9C
+         #2000
         $finish;
-    
     end
 endmodule
