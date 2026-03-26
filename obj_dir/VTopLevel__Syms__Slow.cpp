@@ -11,7 +11,7 @@ VTopLevel__Syms::VTopLevel__Syms(VerilatedContext* contextp, const char* namep, 
     , TOP{this, namep}
 {
     // Check resources
-    Verilated::stackCheck(196);
+    Verilated::stackCheck(330);
     // Setup sub module instances
     // Configure time unit / time precision
     _vm_contextp__->timeunit(-12);

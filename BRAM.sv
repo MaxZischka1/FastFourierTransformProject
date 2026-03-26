@@ -2,23 +2,23 @@
 //might want to change to DPRAM
 
 module BRAM (
-    input logic [15:0] WDATA,
-    input logic [7:0] WADDR,
-    input logic WE,
-    input logic CLK,
-    input logic [7:0] RADDR,
-    output logic [15:0] RDATA
+    input logic [15:0] wdata,
+    input logic [7:0] waddr,
+    input logic we,
+    input logic clk,
+    input logic [7:0] raddr,
+    output logic [15:0] rdata
 );
 
 logic [15:0] internal [255:0];
 
-always_ff @(posedge CLK) begin
-    if(WE) begin
+always_ff @(posedge clk) begin
+    if(we) begin
         for(int i = 0; i < 16; i++) begin
-            internal[WADDR][i] <= WDATA[i]; //256 by 16bit RAM Cells(256x65365)
+            internal[waddr][i] <= wdata[i]; //256 by 16bit RAM Cells(256x65365)
         end
     end
-    RDATA <= internal[RADDR];
+    rdata <= internal[raddr];
 end
 
 endmodule

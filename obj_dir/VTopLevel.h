@@ -32,8 +32,10 @@ class alignas(VL_CACHE_LINE_BYTES) VTopLevel VL_NOT_FINAL : public VerilatedMode
     VL_IN8(&clk,0,0);
     VL_IN8(&startSig,0,0);
     VL_OUT8(&doneSigOut,0,0);
-    VL_OUT8(&addyOut,7,0);
+    VL_OUT8(&bridgeaddyOut,7,0);
+    VL_OUT8(&PPaddyOut,7,0);
     VL_OUT16(&ram1Output,15,0);
+    VL_OUT16(&rdataout,15,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.

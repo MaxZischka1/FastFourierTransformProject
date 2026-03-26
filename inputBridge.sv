@@ -4,18 +4,37 @@ module inputBridge(
     output logic [7:0] address,
     output logic doneSig
 );
-
-logic trans;
+typedef enum logic [1:0] {  
+    IDLE,
+    TRANSMITTING,
+    DONE
+} states;
+states state, next_state;
 logic [2:0] totCount;
 
-always @(posedge clk) begin
-    if(startSig && !trans) begin
-        trans <= 1;
-        doneSig <= 0;
-    end
+always_ff @(posedge clk) begin
+    state <= next_state;
 end
+always_comb begin
+    case(state)
+        IDLE: begin
+            next_state = states'((startSig)?TRANSMITTING:IDLE);
+            doneSig = 0;
+        end
+        TRANSMITTING: begin
+            next_state = states'((totCount==1)?DONE:TRANSMITTING);
+        end
+        DONE: begin
+            next_state = IDLE;
+            doneSig = 1;
+        end
+        default: next_state = IDLE;
+    endcase
+end
+
 always @(posedge clk) begin
-    if(trans) begin
+    
+    if(state==TRANSMITTING)
         if(address != 7)
             address <= address + 1;
         else begin
@@ -23,9 +42,4 @@ always @(posedge clk) begin
             totCount <= totCount + 1;
         end
     end
-    if(totCount == 1) begin
-        trans <= 0;
-        doneSig <= 1;
-    end
-end
 endmodule
