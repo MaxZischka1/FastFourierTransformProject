@@ -21,35 +21,44 @@ void VTopLevel___024root__trace_chg_0_sub_0(VTopLevel___024root* vlSelf, Verilat
     VTopLevel__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    uint32_t* const oldp VL_ATTR_UNUSED = bufp->oldp(vlSymsp->__Vm_baseCode + 0);
-    if (VL_UNLIKELY((vlSelfRef.__Vm_traceActivity[1U]))) {
-        bufp->chgCData(oldp+0,(vlSelfRef.TopLevel__DOT__addressOutIn),8);
-        bufp->chgCData(oldp+1,(vlSelfRef.TopLevel__DOT__PP1__DOT__counter),8);
-        bufp->chgSData(oldp+2,(vlSelfRef.TopLevel__DOT__rdata),16);
-        bufp->chgCData(oldp+3,(vlSelfRef.TopLevel__DOT__PP1__DOT__state),2);
-        bufp->chgCData(oldp+4,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__state),2);
-        bufp->chgCData(oldp+5,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__totCount),3);
+    uint32_t* const oldp VL_ATTR_UNUSED = bufp->oldp(vlSymsp->__Vm_baseCode + 1);
+    if (VL_UNLIKELY(((vlSelfRef.__Vm_traceActivity[1U] 
+                      | vlSelfRef.__Vm_traceActivity
+                      [2U])))) {
+        bufp->chgBit(oldp+0,(vlSelfRef.TopLevel__DOT__doneSigIB));
+        bufp->chgBit(oldp+1,(vlSelfRef.TopLevel__DOT__weADDRen1));
+        bufp->chgBit(oldp+2,(vlSelfRef.TopLevel__DOT__weADDRen2));
+        bufp->chgCData(oldp+3,(vlSelfRef.TopLevel__DOT__waddr1),8);
+        bufp->chgCData(oldp+4,(vlSelfRef.TopLevel__DOT__waddr1PP),8);
+        bufp->chgCData(oldp+5,(vlSelfRef.TopLevel__DOT__waddr2),8);
+        bufp->chgCData(oldp+6,(vlSelfRef.TopLevel__DOT__raddr1),8);
+        bufp->chgCData(oldp+7,(vlSelfRef.TopLevel__DOT__raddr2),8);
+        bufp->chgCData(oldp+8,(vlSelfRef.TopLevel__DOT__PP1__DOT__next_state),2);
+        bufp->chgCData(oldp+9,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__next_state),2);
     }
-    bufp->chgBit(oldp+6,(vlSelfRef.clk));
-    bufp->chgBit(oldp+7,(vlSelfRef.startSig));
-    bufp->chgSData(oldp+8,(vlSelfRef.ram1Output),16);
-    bufp->chgBit(oldp+9,(vlSelfRef.doneSigOut));
-    bufp->chgCData(oldp+10,(vlSelfRef.bridgeaddyOut),8);
-    bufp->chgSData(oldp+11,(vlSelfRef.rdataout),16);
-    bufp->chgCData(oldp+12,(vlSelfRef.PPaddyOut),8);
-    bufp->chgBit(oldp+13,(vlSelfRef.TopLevel__DOT__doneSig));
-    bufp->chgCData(oldp+14,(((0U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
-                              ? ((IData)(vlSelfRef.TopLevel__DOT__doneSig)
-                                  ? 1U : 0U) : ((1U 
-                                                 == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
-                                                 ? 
-                                                ((7U 
-                                                  == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__counter))
-                                                  ? 2U
-                                                  : 1U)
-                                                 : 0U))),2);
-    bufp->chgBit(oldp+15,((1U & (~ (IData)(vlSelfRef.TopLevel__DOT__doneSig)))));
-    bufp->chgCData(oldp+16,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__next_state),2);
+    if (VL_UNLIKELY((vlSelfRef.__Vm_traceActivity[2U]))) {
+        bufp->chgBit(oldp+10,(vlSelfRef.TopLevel__DOT__change));
+        bufp->chgSData(oldp+11,(vlSelfRef.TopLevel__DOT__wdata1RE),16);
+        bufp->chgSData(oldp+12,(vlSelfRef.TopLevel__DOT__rdata1RE),16);
+        bufp->chgSData(oldp+13,(vlSelfRef.TopLevel__DOT__rdata1IM),16);
+        bufp->chgSData(oldp+14,(vlSelfRef.TopLevel__DOT__rdata2RE),16);
+        bufp->chgSData(oldp+15,(vlSelfRef.TopLevel__DOT__rdata2IM),16);
+        bufp->chgCData(oldp+16,(vlSelfRef.TopLevel__DOT__addressOutIn),8);
+        bufp->chgCData(oldp+17,(vlSelfRef.TopLevel__DOT__PP1__DOT__state),2);
+        bufp->chgIData(oldp+18,(vlSelfRef.TopLevel__DOT__bram1IM__DOT__unnamedblk1__DOT__i),32);
+        bufp->chgIData(oldp+19,(vlSelfRef.TopLevel__DOT__bram1RE__DOT__unnamedblk1__DOT__i),32);
+        bufp->chgIData(oldp+20,(vlSelfRef.TopLevel__DOT__bram2IM__DOT__unnamedblk1__DOT__i),32);
+        bufp->chgIData(oldp+21,(vlSelfRef.TopLevel__DOT__bram2RE__DOT__unnamedblk1__DOT__i),32);
+        bufp->chgCData(oldp+22,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__state),2);
+        bufp->chgCData(oldp+23,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__totCount),3);
+    }
+    bufp->chgBit(oldp+24,(vlSelfRef.clk));
+    bufp->chgBit(oldp+25,(vlSelfRef.startSig));
+    bufp->chgSData(oldp+26,(vlSelfRef.ram1Output),16);
+    bufp->chgSData(oldp+27,(vlSelfRef.rdata1REO),16);
+    bufp->chgSData(oldp+28,(vlSelfRef.rdata1IMO),16);
+    bufp->chgSData(oldp+29,(vlSelfRef.rdata2REO),16);
+    bufp->chgSData(oldp+30,(vlSelfRef.rdata2IMO),16);
 }
 
 void VTopLevel___024root__trace_cleanup(void* voidSelf, VerilatedVcd* /*unused*/) {
@@ -60,4 +69,5 @@ void VTopLevel___024root__trace_cleanup(void* voidSelf, VerilatedVcd* /*unused*/
     vlSymsp->__Vm_activity = false;
     vlSymsp->TOP.__Vm_traceActivity[0U] = 0U;
     vlSymsp->TOP.__Vm_traceActivity[1U] = 0U;
+    vlSymsp->TOP.__Vm_traceActivity[2U] = 0U;
 }

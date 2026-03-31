@@ -12,11 +12,11 @@ VTopLevel::VTopLevel(VerilatedContext* _vcontextp__, const char* _vcname__)
     , vlSymsp{new VTopLevel__Syms(contextp(), _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , startSig{vlSymsp->TOP.startSig}
-    , doneSigOut{vlSymsp->TOP.doneSigOut}
-    , bridgeaddyOut{vlSymsp->TOP.bridgeaddyOut}
-    , PPaddyOut{vlSymsp->TOP.PPaddyOut}
     , ram1Output{vlSymsp->TOP.ram1Output}
-    , rdataout{vlSymsp->TOP.rdataout}
+    , rdata1REO{vlSymsp->TOP.rdata1REO}
+    , rdata1IMO{vlSymsp->TOP.rdata1IMO}
+    , rdata2REO{vlSymsp->TOP.rdata2REO}
+    , rdata2IMO{vlSymsp->TOP.rdata2IMO}
     , rootp{&(vlSymsp->TOP)}
 {
     // Register model with the context
@@ -57,11 +57,11 @@ void VTopLevel::eval_step() {
     vlSymsp->__Vm_activity = true;
     vlSymsp->__Vm_deleter.deleteAll();
     if (VL_UNLIKELY(!vlSymsp->__Vm_didInit)) {
+        vlSymsp->__Vm_didInit = true;
         VL_DEBUG_IF(VL_DBG_MSGF("+ Initial\n"););
         VTopLevel___024root___eval_static(&(vlSymsp->TOP));
         VTopLevel___024root___eval_initial(&(vlSymsp->TOP));
         VTopLevel___024root___eval_settle(&(vlSymsp->TOP));
-        vlSymsp->__Vm_didInit = true;
     }
     VL_DEBUG_IF(VL_DBG_MSGF("+ Eval\n"););
     VTopLevel___024root___eval(&(vlSymsp->TOP));
@@ -140,6 +140,6 @@ VL_ATTR_COLD void VTopLevel::traceBaseModel(VerilatedTraceBaseC* tfp, int levels
             " use --trace-fst with VerilatedFst object, and --trace-vcd with VerilatedVcd object");
     }
     stfp->spTrace()->addModel(this);
-    stfp->spTrace()->addInitCb(&trace_init, &(vlSymsp->TOP), name(), false, 18);
+    stfp->spTrace()->addInitCb(&trace_init, &(vlSymsp->TOP));
     VTopLevel___024root__trace_register(&(vlSymsp->TOP), stfp->spTrace());
 }

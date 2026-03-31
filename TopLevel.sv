@@ -2,31 +2,59 @@ module TopLevel(
     input logic clk,
     input logic startSig,
     output logic [15:0] ram1Output,
-    output logic doneSigOut,
-    output logic [7:0] bridgeaddyOut,
-    output logic [15:0] rdataout,
-    output logic [7:0] PPaddyOut
+    output logic [15:0] rdata1REO,
+    output logic [15:0] rdata1IMO,
+    output logic [15:0] rdata2REO,
+    output logic [15:0] rdata2IMO
 );
 
-logic [7:0] addressOutIn;
-logic doneSig;
 
-logic [7:0] raddr;
-
-logic [15:0] rdata;
+logic doneSigIB;
 // logic doneSigPP;
-// logic enADDR;
 
 
-assign bridgeaddyOut = addressOutIn;
-assign doneSigOut = doneSig;
-assign rdataout = rdata;
-assign PPaddyOut = raddr;
+//latch from change
+always @(posedge clk) begin
+    if(doneSigIB) change <= 1;
+end
+logic change;
+//write data ports regs
+logic [15:0] wdata1RE;
+logic [15:0] wdata1IM;
+logic [15:0] wdata2RE;
+logic [15:0] wdata2IM;
+//read data port regs
+logic [15:0] rdata1RE;
+logic [15:0] rdata1IM;
+logic [15:0] rdata2RE;
+logic [15:0] rdata2IM;
+//enables regs
+logic weADDRen1;
+logic weADDRen2;
+//address regs
+logic [7:0] addressOutIn;
+logic [7:0] waddr1;
+logic [7:0] waddr1PP;
+logic [7:0] waddr2;
+logic [7:0] raddr1;
+logic [7:0] raddr2;
+//config for inputBridge to RAM
+assign wdata1RE = change?rdata2RE:ram1Output;
+assign waddr1 = change?waddr1PP:addressOutIn;
+//output assignments
+assign rdata1REO = rdata1RE;
+assign rdata1IMO = rdata1IM;
+assign rdata2REO = rdata2RE;
+assign rdata2IMO = rdata2IM;
 
 
-inputBridge testInBridge(.clk(clk), .startSig(startSig), .address(addressOutIn), .doneSig(doneSig));
-pingPongU PP1(.clk(clk), .startSig(doneSig), .addr(raddr));
+inputBridge testInBridge(.clk(clk), .startSig(startSig), .address(addressOutIn), .doneSig(doneSigIB));
+pingPongU PP1(.clk(clk), .startSig(doneSigIB), .waddr1(waddr1PP), .waddr2(waddr2), .raddr1(raddr1), .raddr2(raddr2), .weADDRen1(weADDRen1), .weADDRen2(weADDRen2));
 testEEPROM EEPROM(.address(addressOutIn), .sampleIn(ram1Output)); //change .WDATA to be multiplexer for when pingpong
-BRAM bram1(.wdata(ram1Output), .waddr(addressOutIn), .we(!doneSig), .clk(clk), .raddr(raddr), .rdata(rdata));
+BRAM bram1RE(.wdata(wdata1RE), .waddr(waddr1), .we(weADDRen1), .clk(clk), .raddr(raddr1), .rdata(rdata1RE));
+BRAM bram1IM(.wdata(wdata1IM), .waddr(waddr1), .we(weADDRen1), .clk(clk), .raddr(raddr1), .rdata(rdata1IM));
+BRAM bram2RE(.wdata(wdata2RE), .waddr(waddr2), .we(weADDRen2), .clk(clk), .raddr(raddr2), .rdata(rdata2RE));
+BRAM bram2IM(.wdata(wdata2IM), .waddr(waddr2), .we(weADDRen2), .clk(clk), .raddr(raddr2), .rdata(rdata2IM));
+
 
 endmodule
