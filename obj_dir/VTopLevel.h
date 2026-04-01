@@ -31,6 +31,7 @@ class alignas(VL_CACHE_LINE_BYTES) VTopLevel VL_NOT_FINAL : public VerilatedMode
     // propagate new values into/out from the Verilated model.
     VL_IN8(&clk,0,0);
     VL_IN8(&startSig,0,0);
+    VL_OUT8(&waddr1Out,7,0);
     VL_OUT16(&ram1Output,15,0);
     VL_OUT16(&rdata1REO,15,0);
     VL_OUT16(&rdata1IMO,15,0);
