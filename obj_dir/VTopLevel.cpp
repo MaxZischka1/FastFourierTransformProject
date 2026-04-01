@@ -13,6 +13,7 @@ VTopLevel::VTopLevel(VerilatedContext* _vcontextp__, const char* _vcname__)
     , clk{vlSymsp->TOP.clk}
     , startSig{vlSymsp->TOP.startSig}
     , waddr1Out{vlSymsp->TOP.waddr1Out}
+    , waddr2Out{vlSymsp->TOP.waddr2Out}
     , ram1Output{vlSymsp->TOP.ram1Output}
     , rdata1REO{vlSymsp->TOP.rdata1REO}
     , rdata1IMO{vlSymsp->TOP.rdata1IMO}

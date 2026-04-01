@@ -28,8 +28,8 @@ logic fftComp; //doneSig buffer basically
 logic [7:0] waddr1Buf, waddr2Buf, raddr1Buf, raddr2Buf; //buffers for the outputs just to manipulate
 logic [SAMPLE-1:0] iteratStep; //this is checking what iteration of FFT we are on.
 
-assign transCompR1W2 = (waddr1Buf==7);
-assign transCompW1R2 = (raddr1Buf==7);
+assign transCompR1W2 = (raddr1Buf==7);
+assign transCompW1R2 = (waddr1Buf==7);
 
 assign raddr1 = raddr1Buf;
 assign raddr2 = raddr2Buf;

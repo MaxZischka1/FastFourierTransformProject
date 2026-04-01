@@ -17,6 +17,7 @@ class alignas(VL_CACHE_LINE_BYTES) VTopLevel___024root final {
     VL_IN8(clk,0,0);
     VL_IN8(startSig,0,0);
     VL_OUT8(waddr1Out,7,0);
+    VL_OUT8(waddr2Out,7,0);
     CData/*0:0*/ TopLevel__DOT__doneSigIB;
     CData/*0:0*/ TopLevel__DOT__change;
     CData/*0:0*/ TopLevel__DOT__weADDRen1;

@@ -64,13 +64,13 @@ void VTopLevel___024root___ico_sequent__TOP__0(VTopLevel___024root* vlSelf) {
     vlSelfRef.TopLevel__DOT__PP1__DOT__next_state = 
         ((2U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
           ? ((1U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
-              ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
+              ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
                        ? ((IData)((3U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state)))
                            ? 3U : 1U) : 2U)) : ((1U 
                                                  & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
                                                  ? 
                                                 ((7U 
-                                                  == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
+                                                  == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
                                                   ? 2U
                                                   : 1U)
                                                  : 
@@ -429,13 +429,13 @@ void VTopLevel___024root___nba_sequent__TOP__0(VTopLevel___024root* vlSelf) {
     // Body
     __Vdly__TopLevel__DOT__BFUoutIM = vlSelfRef.TopLevel__DOT__BFUoutIM;
     __Vdly__TopLevel__DOT__BFUoutRE = vlSelfRef.TopLevel__DOT__BFUoutRE;
-    __Vdly__TopLevel__DOT__PP1__DOT__waddr2Buf = vlSelfRef.TopLevel__DOT__PP1__DOT__waddr2Buf;
     __Vdly__TopLevel__DOT__PP1__DOT__raddr2Buf = vlSelfRef.TopLevel__DOT__PP1__DOT__raddr2Buf;
+    __Vdly__TopLevel__DOT__PP1__DOT__waddr2Buf = vlSelfRef.TopLevel__DOT__PP1__DOT__waddr2Buf;
     __Vdly__TopLevel__DOT__PP1__DOT__raddr1Buf = vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf;
     __Vdly__TopLevel__DOT__PP1__DOT__waddr1Buf = vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf;
-    __VdlySet__TopLevel__DOT__bram2IM__DOT__internal__v0 = 0U;
     __VdlySet__TopLevel__DOT__bram1RE__DOT__internal__v0 = 0U;
     __VdlySet__TopLevel__DOT__bram1IM__DOT__internal__v0 = 0U;
+    __VdlySet__TopLevel__DOT__bram2IM__DOT__internal__v0 = 0U;
     __VdlySet__TopLevel__DOT__bram2RE__DOT__internal__v0 = 0U;
     if (vlSelfRef.TopLevel__DOT__weADDRen1) {
         vlSelfRef.TopLevel__DOT__bram1RE__DOT__unnamedblk1__DOT__i = 0x00000010U;
@@ -765,8 +765,8 @@ void VTopLevel___024root___nba_sequent__TOP__0(VTopLevel___024root* vlSelf) {
         __VdlyDim0__TopLevel__DOT__bram2RE__DOT__internal__v15 
             = vlSelfRef.TopLevel__DOT__PP1__DOT__waddr2Buf;
     }
-    if (((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf)) 
-         | (7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf)))) {
+    if (((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf)) 
+         | (7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf)))) {
         vlSelfRef.TopLevel__DOT__PP1__DOT__iteratStep 
             = (0x000000ffU & ((IData)(1U) + (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__iteratStep)));
     }
@@ -1076,6 +1076,7 @@ void VTopLevel___024root___nba_sequent__TOP__0(VTopLevel___024root* vlSelf) {
         [__Vtableidx2];
     vlSelfRef.TopLevel__DOT__testInBridge__DOT__state 
         = vlSelfRef.TopLevel__DOT__testInBridge__DOT__next_state;
+    vlSelfRef.waddr2Out = vlSelfRef.TopLevel__DOT__PP1__DOT__waddr2Buf;
     if (vlSelfRef.TopLevel__DOT__change) {
         vlSelfRef.TopLevel__DOT__waddr1 = vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf;
         vlSelfRef.TopLevel__DOT__wdata1RE = vlSelfRef.TopLevel__DOT__BFUoutRE;
@@ -1191,13 +1192,13 @@ void VTopLevel___024root___nba_sequent__TOP__0(VTopLevel___024root* vlSelf) {
     vlSelfRef.TopLevel__DOT__PP1__DOT__next_state = 
         ((2U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
           ? ((1U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
-              ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
+              ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
                        ? ((IData)((3U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state)))
                            ? 3U : 1U) : 2U)) : ((1U 
                                                  & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
                                                  ? 
                                                 ((7U 
-                                                  == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
+                                                  == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
                                                   ? 2U
                                                   : 1U)
                                                  : 

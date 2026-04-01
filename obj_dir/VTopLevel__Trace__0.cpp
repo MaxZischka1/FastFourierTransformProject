@@ -40,8 +40,8 @@ void VTopLevel___024root__trace_chg_0_sub_0(VTopLevel___024root* vlSelf, Verilat
         bufp->chgCData(oldp+14,(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr2Buf),8);
         bufp->chgSData(oldp+15,(vlSelfRef.TopLevel__DOT__wdata1RE),16);
         bufp->chgCData(oldp+16,(vlSelfRef.TopLevel__DOT__PP1__DOT__state),2);
-        bufp->chgBit(oldp+17,((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))));
-        bufp->chgBit(oldp+18,((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))));
+        bufp->chgBit(oldp+17,((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))));
+        bufp->chgBit(oldp+18,((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))));
         bufp->chgBit(oldp+19,((IData)((3U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state)))));
         bufp->chgCData(oldp+20,(vlSelfRef.TopLevel__DOT__PP1__DOT__iteratStep),8);
         bufp->chgIData(oldp+21,(vlSelfRef.TopLevel__DOT__bram1IM__DOT__unnamedblk1__DOT__i),32);
@@ -59,10 +59,11 @@ void VTopLevel___024root__trace_chg_0_sub_0(VTopLevel___024root* vlSelf, Verilat
     bufp->chgSData(oldp+32,(vlSelfRef.rdata2REO),16);
     bufp->chgSData(oldp+33,(vlSelfRef.rdata2IMO),16);
     bufp->chgCData(oldp+34,(vlSelfRef.waddr1Out),8);
-    bufp->chgBit(oldp+35,(vlSelfRef.TopLevel__DOT__doneSigIB));
-    bufp->chgCData(oldp+36,(((2U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
+    bufp->chgCData(oldp+35,(vlSelfRef.waddr2Out),8);
+    bufp->chgBit(oldp+36,(vlSelfRef.TopLevel__DOT__doneSigIB));
+    bufp->chgCData(oldp+37,(((2U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
                               ? ((1U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
-                                  ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
+                                  ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
                                            ? ((IData)(
                                                       (3U 
                                                        == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state)))
@@ -70,11 +71,11 @@ void VTopLevel___024root__trace_chg_0_sub_0(VTopLevel___024root* vlSelf, Verilat
                                                : 1U)
                                            : 2U)) : 
                              ((1U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
-                               ? ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
+                               ? ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
                                    ? 2U : 1U) : ((IData)(vlSelfRef.TopLevel__DOT__doneSigIB)
                                                   ? 1U
                                                   : 0U)))),2);
-    bufp->chgCData(oldp+37,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__next_state),2);
+    bufp->chgCData(oldp+38,(vlSelfRef.TopLevel__DOT__testInBridge__DOT__next_state),2);
 }
 
 void VTopLevel___024root__trace_cleanup(void* voidSelf, VerilatedVcd* /*unused*/) {

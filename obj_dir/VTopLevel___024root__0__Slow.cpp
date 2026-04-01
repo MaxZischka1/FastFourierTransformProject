@@ -122,6 +122,7 @@ VL_ATTR_COLD void VTopLevel___024root___stl_sequent__TOP__0(VTopLevel___024root*
     vlSelfRef.rdata1IMO = vlSelfRef.TopLevel__DOT__rdata1IM;
     vlSelfRef.rdata2REO = vlSelfRef.TopLevel__DOT__rdata2RE;
     vlSelfRef.rdata2IMO = vlSelfRef.TopLevel__DOT__rdata2IM;
+    vlSelfRef.waddr2Out = vlSelfRef.TopLevel__DOT__PP1__DOT__waddr2Buf;
     __Vtableidx2 = vlSelfRef.TopLevel__DOT__addressOutIn;
     vlSelfRef.ram1Output = VTopLevel__ConstPool__TABLE_h229f39d7_0
         [__Vtableidx2];
@@ -146,13 +147,13 @@ VL_ATTR_COLD void VTopLevel___024root___stl_sequent__TOP__0(VTopLevel___024root*
     vlSelfRef.TopLevel__DOT__PP1__DOT__next_state = 
         ((2U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
           ? ((1U & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
-              ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
+              ? 0U : ((7U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
                        ? ((IData)((3U == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state)))
                            ? 3U : 1U) : 2U)) : ((1U 
                                                  & (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__state))
                                                  ? 
                                                 ((7U 
-                                                  == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__waddr1Buf))
+                                                  == (IData)(vlSelfRef.TopLevel__DOT__PP1__DOT__raddr1Buf))
                                                   ? 2U
                                                   : 1U)
                                                  : 
@@ -242,6 +243,7 @@ VL_ATTR_COLD void VTopLevel___024root___ctor_var_reset(VTopLevel___024root* vlSe
     vlSelf->rdata2REO = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 7102719076475272938ull);
     vlSelf->rdata2IMO = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 1584714297638502653ull);
     vlSelf->waddr1Out = VL_SCOPED_RAND_RESET_I(8, __VscopeHash, 2648599052521179159ull);
+    vlSelf->waddr2Out = VL_SCOPED_RAND_RESET_I(8, __VscopeHash, 2296014937893160085ull);
     vlSelf->TopLevel__DOT__doneSigIB = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 7562141334435191444ull);
     vlSelf->TopLevel__DOT__change = VL_SCOPED_RAND_RESET_I(1, __VscopeHash, 13228183638273972666ull);
     vlSelf->TopLevel__DOT__BFUoutRE = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 8123094190588816566ull);

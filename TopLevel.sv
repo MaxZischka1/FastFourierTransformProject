@@ -6,7 +6,8 @@ module TopLevel(
     output logic [15:0] rdata1IMO,
     output logic [15:0] rdata2REO,
     output logic [15:0] rdata2IMO,
-    output logic [7:0] waddr1Out
+    output logic [7:0] waddr1Out,
+    output logic [7:0] waddr2Out
 );
 
 
@@ -48,6 +49,7 @@ assign wdata1RE = (change?BFUoutRE:ram1Output);
 assign waddr1 = change?waddr1PP:addressOutIn;
 
 assign waddr1Out = waddr1;
+assign waddr2Out = waddr2;
 
 
 
