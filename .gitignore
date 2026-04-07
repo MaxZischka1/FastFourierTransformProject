@@ -1,1 +1,11 @@
+# Verilator output
 obj_dir/
+
+# Waveform files
+*.vcd
+*.ghw
+*.fst
+
+# Trace files
+*.dat
+*.log

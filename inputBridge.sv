@@ -2,6 +2,7 @@ module inputBridge(
     input logic startSig,
     input logic clk,
     output logic [7:0] address,
+    output logic transmitSig,
     output logic doneSig
 );
 typedef enum logic [1:0] {  
@@ -11,6 +12,8 @@ typedef enum logic [1:0] {
 } states;
 states state, next_state;
 logic [2:0] totCount;
+
+assign transmitSig = (state==TRANSMITTING)?1:0;
 
 always_ff @(posedge clk) begin
     state <= next_state;
