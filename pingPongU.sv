@@ -22,12 +22,11 @@ typedef enum logic [1:0] {
 states state, next_state;
 
 logic transCompR1W2, transCompW1R2; //switch statements for when counters reach specific number
-logic fftComp; //doneSig buffer basically
 logic [7:0] waddr1Buf, waddr2Buf, raddr1Buf, raddr2Buf; //buffers for the outputs just to manipulate
 logic [SAMPLE-1:0] iteratStep; //this is checking what iteration of FFT we are on.
 //combinational transition logic
-assign transCompR1W2 = (raddr1Buf==7);
-assign transCompW1R2 = (waddr1Buf==7);
+assign transCompR1W2 = (raddr1Buf==6);
+assign transCompW1R2 = (waddr1Buf==6);
 //output buffers
 assign raddr1 = raddr1Buf;
 assign raddr2 = raddr2Buf;
@@ -42,7 +41,6 @@ always_comb begin //state trans block
         IDLE: begin
             next_state = states'((startSig)?READ1WRITE2:IDLE);
             //all enables 0
-            fftComp = 1'd0;
             weADDRen1 = 1'd0;
             weADDRen2 = 1'd0;
             readMemSelBuf = 1'd1;
@@ -53,23 +51,20 @@ always_comb begin //state trans block
             weADDRen1 = 1'd0;
             //ram2en
             weADDRen2 = 1'd1;
-            fftComp = 1'd0;
 
             readMemSelBuf = 1'd0; //read from 1
         end
         //possibly include an intermediate state to zero out buffers
         WRITE1READ2: begin
-            next_state = states'((transCompW1R2)?((fftComp)?DONE:READ1WRITE2):WRITE1READ2);
+            next_state = states'((transCompW1R2)?((iteratStep==7)?DONE:READ1WRITE2):WRITE1READ2);
             weADDRen1 = 1'd1;//ram1en
             weADDRen2 = 1'd0;//ram2en
-            fftComp = 1'd0;
             readMemSelBuf = 1'd1; //read from 2
         end
         DONE: begin
             next_state = IDLE;
             weADDRen1 = 1'd0;//ram1en
             weADDRen2 = 1'd0;//ram2en
-            fftComp = 1'd1;
             readMemSelBuf = 1'd1;
         end
         default: next_state = IDLE;

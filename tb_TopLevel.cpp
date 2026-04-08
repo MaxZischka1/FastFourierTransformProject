@@ -13,7 +13,7 @@ int main(int argc, char** argv){
     tb->startSig = 0;
 
     int main_time = 0;
-    int max_time = 10000000;
+    int max_time = 100000;
     
     while(!Verilated::gotFinish() && main_time<max_time){
         if((main_time%5) == 0){

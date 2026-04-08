@@ -1,3 +1,12 @@
+/*
+Current issue to solve later. The clock cycles. There is a a singular edge delay between the read and write no matter what. 
+So always the read should be 1 address less than the write.
+Ontop of that there is a 1 clock delay from the BFU leading to a total of two cycle delay between an address read from
+and its respective address written to. raddr-2 = waddr
+
+*/
+
+
 module TopLevel( //feed test eeprom simple values and see double buffering go from 0 to 15.
     input logic clk,
     input logic startSig,
@@ -10,10 +19,10 @@ module TopLevel( //feed test eeprom simple values and see double buffering go fr
     output logic [7:0] waddr2Out,
     output logic [15:0] BFUREout,
     output logic [15:0] BFUREinOut,
+    output logic changeOut,
+    output logic readMemSelOut,
     output logic [7:0] raddr1Out,
-    output logic [7:0] raddr2Out,
-    output logic changeOut
-
+    output logic [7:0] raddr2Out
 );
 
 
@@ -68,10 +77,12 @@ logic [15:0] BFUREin;
 logic [15:0] BFUIMin;
 assign BFUREout = BFUoutRE;
 assign BFUREinOut = BFUREin;
+//readMemSel output
+assign readMemSelOut = readMemSel;
 
-//debugging out read addresses
 assign raddr1Out = raddr1;
 assign raddr2Out = raddr2;
+
 
 inputBridge testInBridge(.clk(clk), .startSig(startSig), .address(addressOutIn), .transmitSig(transmitSigIB), .doneSig(doneSigIB));
 pingPongU PP1(.clk(clk), .startSig(doneSigIB), .waddr1(waddr1PP), .waddr2(waddr2), .raddr1(raddr1), .raddr2(raddr2), 
@@ -82,7 +93,7 @@ BRAM bram1IM(.wdata(BFUoutIM), .waddr(waddr1), .we(weADDRen1), .clk(clk), .raddr
 BRAM bram2RE(.wdata(BFUoutRE), .waddr(waddr2), .we(weADDRen2), .clk(clk), .raddr(raddr2), .rdata(rdata2RE));
 BRAM bram2IM(.wdata(BFUoutIM), .waddr(waddr2), .we(weADDRen2), .clk(clk), .raddr(raddr2), .rdata(rdata2IM));
 //mux for .dIn of BFU 
-assign BFUREin = readMemSel?rdata1RE:rdata2RE;
-assign BFUIMin = readMemSel?rdata1IM:rdata2IM;
+assign BFUREin = readMemSel?rdata2RE:rdata1RE;
+assign BFUIMin = readMemSel?rdata2IM:rdata1IM;
 BFU butUnit(.clk(clk), .dInRE(BFUREin), .dInIM(BFUIMin), .dOutRE(BFUoutRE), .dOutIM(BFUoutIM));
 endmodule
