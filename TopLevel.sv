@@ -3,9 +3,7 @@ Current issue to solve later. The clock cycles. There is a a singular edge delay
 So always the read should be 1 address less than the write.
 Ontop of that there is a 1 clock delay from the BFU leading to a total of two cycle delay between an address read from
 and its respective address written to. raddr-2 = waddr
-
 */
-
 
 module TopLevel( //feed test eeprom simple values and see double buffering go from 0 to 15.
     input logic clk,
