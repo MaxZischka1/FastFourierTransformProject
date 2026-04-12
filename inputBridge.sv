@@ -38,10 +38,10 @@ end
 always @(posedge clk) begin
     
     if(state==TRANSMITTING)
-        if(address != 7)
+        if(address != 8)
             address <= address + 1;
         else begin
-            address <= 0;
+            address <= 1;
             totCount <= totCount + 1;
         end
     end

@@ -1,7 +1,8 @@
 //dual RAM ReadWrite setup //4 RAMs require for IM and RE one is always reading(prev vales) the other is writing(cur vals)
 //Initially use a UART transmission for signal DATA, hopefully move to ethernet.
 //Hypothetically logic starts in EEPROM or SPRAM we have to import. Sent via Serial or Ethernet
-module pingPongU #(parameter SAMPLE = 8)( //change to two FSMs one for writing address index and one for reading.
+module pingPongU #(parameter SAMPLE = 8)( //current issue solving is getting address transition correct,
+//should go from 0 to 7 with other RAM staying at a consistant 0. May need an IF statement. Then start BFU construction
     input logic clk,
     input logic startSig,
     output logic [7:0] waddr1,
@@ -33,8 +34,8 @@ logic writeComp, readComp; //switch statements for when counters reach specific 
 logic [7:0] waddr1Buf, waddr2Buf, raddr1Buf, raddr2Buf; //buffers for the outputs just to manipulate
 logic [SAMPLE-1:0] iteratStep; //this is checking what iteration of FFT we are on.
 //combinational transition logic
-assign readComp = (raddr1Buf==6||raddr2Buf==6);
-assign writeComp = (waddr1Buf==6||waddr2Buf==6);
+assign readComp = (raddr1Buf==7||raddr2Buf==7);
+assign writeComp = (waddr1Buf==7||waddr2Buf==7);
 //output buffers
 assign raddr1 = raddr1Buf;
 assign raddr2 = raddr2Buf;
@@ -45,6 +46,7 @@ logic readMemSelBuf;
 assign readMemSel = readMemSelBuf; //start in read2
 
 logic holdFlag;
+
 
 always_comb begin //state trans block
     case(statew)

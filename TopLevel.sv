@@ -5,7 +5,8 @@ Ontop of that there is a 1 clock delay from the BFU leading to a total of two cy
 and its respective address written to. raddr-2 = waddr
 */
 
-module TopLevel( //feed test eeprom simple values and see double buffering go from 0 to 15.
+module TopLevel( //made the change where addresses now index from 0 to 7 instead of 0 to 6 before indexing to zero,
+//as the waves show there is an 8th address but the weEnable swaps so it is 0 to 7.
     input logic clk,
     input logic startSig,
     output logic [15:0] ram1Output,
@@ -20,7 +21,9 @@ module TopLevel( //feed test eeprom simple values and see double buffering go fr
     output logic changeOut,
     output logic readMemSelOut,
     output logic [7:0] raddr1Out,
-    output logic [7:0] raddr2Out
+    output logic [7:0] raddr2Out,
+    output logic weADDRen1Out,
+    output logic weADDRen2Out
 );
 
 
@@ -80,6 +83,9 @@ assign readMemSelOut = readMemSel;
 
 assign raddr1Out = raddr1;
 assign raddr2Out = raddr2;
+
+assign weADDRen1Out = weADDRen1;
+assign weADDRen2Out = weADDRen2;
 
 
 inputBridge testInBridge(.clk(clk), .startSig(startSig), .address(addressOutIn), .transmitSig(transmitSigIB), .doneSig(doneSigIB));
