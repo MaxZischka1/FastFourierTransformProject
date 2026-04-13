@@ -7,6 +7,8 @@ and its respective address written to. raddr-2 = waddr
 
 module TopLevel( //made the change where addresses now index from 0 to 7 instead of 0 to 6 before indexing to zero,
 //as the waves show there is an 8th address but the weEnable swaps so it is 0 to 7.
+
+//adding pause and giving computation time for what AGU does next. Address generation
     input logic clk,
     input logic startSig,
     output logic [15:0] ram1Output,
@@ -86,6 +88,7 @@ assign raddr2Out = raddr2;
 
 assign weADDRen1Out = weADDRen1;
 assign weADDRen2Out = weADDRen2;
+//pipelining the outputs of 
 
 
 inputBridge testInBridge(.clk(clk), .startSig(startSig), .address(addressOutIn), .transmitSig(transmitSigIB), .doneSig(doneSigIB));
