@@ -24,12 +24,13 @@ waveform.vcd: ./obj_dir/V$(MODULE)
 ./obj_dir/V$(MODULE): .stamp.verilate
 	@echo
 	@echo "## BUILDSIM ##"
-	@make -C obj_dir -f V$(MODULE).mk V$(MODULE)
+	@$(MAKE) -C obj_dir -f V$(MODULE).mk V$(MODULE)
 
 .stamp.verilate: $(SRCS) tb_$(MODULE).cpp
 	@echo
 	@echo "## VERILATING ##"
 	verilator -Wall --trace -cc $(SRCS) --top-module $(MODULE) --exe tb_$(MODULE).cpp -CFLAGS "-std=c++17"
+	@touch .stamp.verilate
 	
 
 .PHONY:lint
