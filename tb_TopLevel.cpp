@@ -4,6 +4,7 @@
 #include "verilated_vcd_c.h"
 
 static int main_time = 0;
+static int error_count = 0;
 
 void tick(VTopLevel *tb, VerilatedVcdC *tfp){
     tb->clk = 0;
@@ -16,9 +17,15 @@ void tick(VTopLevel *tb, VerilatedVcdC *tfp){
     tfp->dump(main_time);
     main_time += 5;
     
-    tb->clk = 0;
-    tb->eval();
-    tfp->dump(main_time);
+}
+
+void check(const char* name, int actual, int expected, int cycle){
+    if(actual != expected){
+        printf("Failure cycle %d: %s = 0x%04X, expected 0x%04X\n",
+                cycle, name, actual, expected);
+
+        error_count++;
+    }
 }
 
 int main(int argc, char** argv){
@@ -27,20 +34,4 @@ int main(int argc, char** argv){
     VTopLevel *tb = new VTopLevel;
     VerilatedVcdC* tfp = new VerilatedVcdC;
 
-    tb->trace(tfp, 99);        
-    tfp->open("waveform.vcd");
-    tb->startSig = 0;
-    tb->clk = 0;
-    int max_cycles = 10000;
-    for(int cycle = 0; (cycle < max_cycles) && !Verilated::gotFinish(); cycle++){
-        if (cycle == 2) tb->startSig = 1;
-        if (cycle == 3) tb->startSig = 0;
-
-        tick(tb, tfp);
-    }
-    tb->final();
-    tfp->close();
-    exit(EXIT_SUCCESS);
-}
-
-
+    tb->trace(

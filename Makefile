@@ -2,43 +2,37 @@ MODULE=TopLevel
 SRCS = $(MODULE).sv inputBridge.sv testEEPROM.sv BRAM.sv pingPongU.sv BFU.sv
 
 .PHONY:sim
-sim: waveform.vcd
+sim: waveformTopLevel.vcd
 
 .PHONY: verilate
 verilate: .stamp.verilate
 
 .PHONY: build
-build: obj_dir/VTopLevel
+build: obj_dir_TL/VTopLevel
 
 .PHONY: waves
-waves: waveform.vcd
+waves: waveformTopLevel.vcd
 	@echo
 	@echo "## WAVES ##"
-	gtkwave waveform.vcd
+	gtkwave waveformTopLevel.vcd
 
-waveform.vcd: ./obj_dir/V$(MODULE)
+waveformTopLevel.vcd: ./obj_dir_TL/V$(MODULE)
 	@echo
 	@echo "##SIMULATE##"
-	@./obj_dir/V$(MODULE)
+	@./obj_dir_TL/V$(MODULE)
 
-./obj_dir/V$(MODULE): .stamp.verilate
+./obj_dir_TL/V$(MODULE): .stamp.verilate
 	@echo
 	@echo "## BUILDSIM ##"
-	@$(MAKE) -C obj_dir -f V$(MODULE).mk V$(MODULE)
+	@$(MAKE) -C obj_dir_TL -f V$(MODULE).mk V$(MODULE)
 
 .stamp.verilate: $(SRCS) tb_$(MODULE).cpp
 	@echo
 	@echo "## VERILATING ##"
-	verilator -Wall --trace -cc $(SRCS) --top-module $(MODULE) --exe tb_$(MODULE).cpp -CFLAGS "-std=c++17"
+	verilator -Wall --trace -cc $(SRCS) --top-module $(MODULE) --exe tb_$(MODULE).cpp --Mdir obj_dir_TL -CFLAGS "-std=c++17"
 	@touch .stamp.verilate
 	
 
 .PHONY:lint
 lint: $(SRCS)
-	verilator --lint-only $(SRCS)
-
-.PHONY: clean
-clean:
-	rm -rf .stamp.*;
-	rm -rf ./obj_dir
-	rm -rf waveform.vcd
+	verilator --lint

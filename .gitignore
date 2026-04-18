@@ -1,5 +1,9 @@
 # Verilator output
-obj_dir/
+obj_dir_bram/
+obj_dir_TL/
+.stamp.verilate
+.stamp.verilate_bram
+
 
 # Waveform files
 *.vcd
