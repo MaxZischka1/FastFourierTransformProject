@@ -1,32 +1,8 @@
 #include <stdlib.h>
+#include "verilatorTB.h"
 #include "VTopLevel.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
-
-static int main_time = 0;
-static int error_count = 0;
-
-void tick(VTopLevel *tb, VerilatedVcdC *tfp){
-    tb->clk = 0;
-    tb->eval();
-    tfp->dump(main_time);
-    main_time += 5;
-
-    tb->clk = 1;
-    tb->eval();
-    tfp->dump(main_time);
-    main_time += 5;
-    
-}
-
-void check(const char* name, int actual, int expected, int cycle){
-    if(actual != expected){
-        printf("Failure cycle %d: %s = 0x%04X, expected 0x%04X\n",
-                cycle, name, actual, expected);
-
-        error_count++;
-    }
-}
 
 int main(int argc, char** argv){
     Verilated::commandArgs(argc,argv);
@@ -34,4 +10,33 @@ int main(int argc, char** argv){
     VTopLevel *tb = new VTopLevel;
     VerilatedVcdC* tfp = new VerilatedVcdC;
 
-    tb->trace(
+    tb->trace(tfp, 99);        
+    tfp->open("waveformTopLevel.vcd");
+    tb->startSig = 0;
+    tb->clk = 0;
+    int max_cycles = 15;
+    for(int cycle = 0; (cycle < max_cycles) && !Verilated::gotFinish(); cycle++){
+        if (cycle == 2) tb->startSig = 1;
+        if (cycle == 3) tb->startSig = 0;
+        int ram1Out =  tb->ram1Output;
+        int inputBridgeOut = tb->waddr1Out;
+        tick(tb, tfp);
+        if(cycle >= 4 && cycle <= 11){
+            int expectRam1 = cycle-3;
+            check("ram1Outputs",ram1Out, expectRam1, main_time);
+            check("inputBridgeOutputs", inputBridgeOut, expectRam1, main_time);
+        }
+    }
+    evalEnd(error_count);
+    // if (error_count == 0)
+    // {
+    //     printf("PassedTB");
+    // } else{
+    //     printf("Failed with %d error\n", error_count);
+    // }
+    tb->final();
+    tfp->close();
+    return (error_count == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+

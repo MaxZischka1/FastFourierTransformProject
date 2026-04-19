@@ -92,7 +92,7 @@ assign weADDRen2Out = weADDRen2;
 
 
 inputBridge testInBridge(.clk(clk), .startSig(startSig), .address(addressOutIn), .transmitSig(transmitSigIB), .doneSig(doneSigIB));
-pingPongU PP1(.clk(clk), .startSig(doneSigIB), .waddr1(waddr1PP), .waddr2(waddr2), .raddr1(raddr1), .raddr2(raddr2), 
+PPU PP1(.clk(clk), .startSig(doneSigIB), .waddr1(waddr1PP), .waddr2(waddr2), .raddr1(raddr1), .raddr2(raddr2), 
 .weADDRen1(weADDRen1PP), .weADDRen2(weADDRen2), .readMemSel(readMemSel));
 testEEPROM EEPROM(.address(addressOutIn), .sampleIn(ram1Output)); //change .WDATA to be multiplexer for when pingpong
 BRAM bram1RE(.wdata(wdata1RE), .waddr(waddr1), .we(weADDRen1), .clk(clk), .raddr(raddr1), .rdata(rdata1RE));
