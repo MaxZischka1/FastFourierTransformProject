@@ -27,37 +27,32 @@ logic doneIN;
 logic [7:0] addressIn;
 logic weInput;
 
-
-
 always_latch begin
     if(startSigIN) change = 0;
     if(doneIN) change = 1;
 end
-
-
-
 always @(posedge clk) begin
     statein <= next_statein;
     case(statein) 
         IDLEIN: begin
-            doneIN <= 0;
-            addressIn <= 0;
-            weInput <= 0; 
+            doneIN <= 1'd0;
+            addressIn <= 8'd255;
+            weInput <= 1'd0; 
         end
         TRANSIN:begin
-            weInput <= 1; 
-            addressIn <= addressIn + 1;
-            doneIN <= 0;
+            weInput <= 1'd1; 
+            addressIn <= addressIn + 1'd1;
+            doneIN <= 1'd0;
         end
         DONEIN: begin
-            weInput <= 0; 
-            doneIN <= 1;
-            addressIn <= 0;
+            weInput <= 1'd0; 
+            doneIN <= 1'd1;
+            addressIn <= 8'd255;
         end
         default: begin
             weInput <= 0; 
             doneIN <= 0;
-            addressIn <= 0;
+            addressIn <= 8'd255;
         end
     endcase
 end
@@ -67,7 +62,7 @@ always_comb begin
             next_statein = states_in'(startSigIN?TRANSIN:IDLEIN);
         end
         TRANSIN:begin
-            next_statein = states_in'((addressIn==7)?DONEIN:TRANSIN);
+            next_statein = states_in'((addressIn==6)?DONEIN:TRANSIN);
         end
         DONEIN: begin
             next_statein = IDLEIN;
@@ -104,8 +99,8 @@ logic [7:0] waddr1Buf, waddr2Buf, raddr1Buf, raddr2Buf,
 waddr1BufP1, waddr1BufP2, waddr2BufP1, waddr2BufP2; //buffers for the outputs just to manipulate
 logic [3:0] iteratStep; //this is checking what iteration of FFT we are on.
 //combinational transition logic
-assign readComp = (raddr1Buf==7||raddr2Buf==7);
-assign writeComp = (waddr1Buf==7||waddr2Buf==7);
+assign readComp = (raddr1Buf==6||raddr2Buf==6);
+assign writeComp = (waddr1Buf==6||waddr2Buf==6);
 //output buffers
 assign raddr1 = raddr1Buf;
 assign raddr2 = raddr2Buf;
@@ -132,7 +127,7 @@ always_comb begin //state trans block
         end
         //possibly include an intermediate state to zero out buffers
         WRITE1: begin
-            next_statew = states_write'((writeComp)?((iteratStep==7)?DONEW:WRITE2):WRITE1);
+            next_statew = states_write'((writeComp)?((iteratStep==6)?DONEW:WRITE2):WRITE1);
         end
         DONEW: begin
             next_statew = IDLEW;
@@ -151,7 +146,7 @@ always_comb begin //state trans block
         end
         //possibly include an intermediate state to zero out buffers
         READ2: begin
-            next_stater = states_read'((readComp)?((iteratStep==7)?DONER:READ1):READ2);
+            next_stater = states_read'((readComp)?((iteratStep==6)?DONER:READ1):READ2);
         end
         DONER:begin
             next_stater = IDLER;
@@ -166,15 +161,15 @@ always_ff @(posedge clk) begin //startSignal
     stater <= next_stater;
     case(statew)
         IDLEW: begin
-            waddr1Buf <= 8'd0;
-            waddr2Buf <= 8'd0; 
+            waddr1Buf <= 8'd255;
+            waddr2Buf <= 8'd255; 
 
             weADDRen1Buf <= 1'd0;
             weADDRen2Buf <= 1'd0;          
         end
         WRITE2: begin
             //ram1 counter(read)
-            waddr1Buf <= 8'd0;
+            waddr1Buf <= 8'd255;
             waddr2Buf <= waddr2Buf + 1;
             weADDRen1Buf <= 1'd0;//ram2en
             weADDRen2Buf <= 1'd1;
@@ -182,14 +177,14 @@ always_ff @(posedge clk) begin //startSignal
         WRITE1:begin
             //ram1Config
             waddr1Buf <= waddr1Buf + 1;
-            waddr2Buf <= 8'd0;
+            waddr2Buf <= 8'd255;
 
             weADDRen1Buf <= 1'd1;//ram1en
             weADDRen2Buf <= 1'd0;//ram2en
         end
         default: begin
-            waddr1Buf <= 8'd0;
-            waddr2Buf <= 8'd0;
+            waddr1Buf <= 8'd255;
+            waddr2Buf <= 8'd255;
             weADDRen1Buf <= 1'd0;//ram1en
             weADDRen2Buf <= 1'd0;//ram2en
         end
@@ -197,8 +192,8 @@ always_ff @(posedge clk) begin //startSignal
 
     case(stater)
         IDLER: begin
-            raddr1Buf <= 8'd0;
-            raddr2Buf <= 8'd0; 
+            raddr1Buf <= 8'd255;
+            raddr2Buf <= 8'd255; 
             readMemSelBuf <= 1'd1;
                        
         end
@@ -206,21 +201,21 @@ always_ff @(posedge clk) begin //startSignal
             //ram1 counter(read)
             raddr1Buf <= raddr1Buf + 1;
             //ram2Config
-            raddr2Buf <= 8'd0;
+            raddr2Buf <= 8'd255;
 
             readMemSelBuf <= 1'd0;
         end
         READ2:begin
             //ram1Config
-            raddr1Buf <= 8'd0;
+            raddr1Buf <= 8'd255;
             //ram2Config
             raddr2Buf <= raddr2Buf + 1;
             readMemSelBuf <= 1'd1;
 
         end
         default: begin
-            raddr1Buf <= 8'd0;
-            raddr2Buf <= 8'd0;            
+            raddr1Buf <= 8'd255;
+            raddr2Buf <= 8'd255;            
             readMemSelBuf <= 1'd1;
         end
     endcase

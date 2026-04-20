@@ -2,9 +2,11 @@
 obj_dir_bram/
 obj_dir_TL/
 obj_dir_PPU/
+obj_dir_BFU/
 .stamp.verilate
 .stamp.verilate_bram
 .stamp.verilate_PPU
+.stamp.verilate_BFU
 
 
 # Waveform files

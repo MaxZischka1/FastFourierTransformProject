@@ -16,8 +16,8 @@ int main(int argc, char** argv){
         if(cycle==1) tb->startSigIN = 1;
         if(cycle==2) tb->startSigIN = 0;
         tick(tb,tfp);
-        if(cycle>=2 && cycle<= 9){ //behavior is indexing from 1 -8
-            int expects = cycle-1;
+        if(cycle>=2 && cycle<= 9){ //behavior is indexing from 0-7
+            int expects = cycle-2;
             check("writeEnable1", tb->weADDRen1, 1, cycle);
             check("changeVal", tb->change, 0, cycle);
             check("InputBridgeAddress", tb->waddr1, expects, cycle);
@@ -27,15 +27,14 @@ int main(int argc, char** argv){
             check("readADDR2Buf", tb->weADDRen2, 0, cycle);
         }
         if(cycle>=12 && cycle <= 19){
-            int expects = cycle-11;
+            int expects = cycle-12;
             check("readADDR2Buf", tb->raddr1, expects, cycle);
         }
         if(cycle>=14&&cycle<=21){ //Pipelined twice
-            int expects = cycle-13;
+            int expects = cycle-14;
             check("write2Addr", tb->waddr2, expects, cycle);
             check("writeEnable2", tb->weADDRen2, 1, cycle);
         }
-        
     }
     //
     return finish(tb,tfp);

@@ -20,8 +20,9 @@ int main(int argc, char** argv){
         tick(tb, tfp);
         if(cycle >= 3 && cycle <= 10){//DO NOT CHANGE UNLESS VERY IMPORTANT
             int expectRam1 = cycle-2;
+            int expectIB = expectRam1 - 1;
             check("ram1Outputs",ram1Out, expectRam1, cycle);
-            check("inputBridgeOutputs", inputBridgeOut, expectRam1, cycle);
+            check("inputBridgeOutputs", inputBridgeOut, expectIB, cycle);
         }
     }
     return finish(tb,tfp);

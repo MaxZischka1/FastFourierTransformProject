@@ -82,3 +82,20 @@ waveform_PPU.vcd: ./obj_dir_PPU/VPPU
 	verilator -Wall --trace -cc PPU.sv --top-module PPU --exe tb_PPU.cpp verilatorTB.cpp --Mdir obj_dir_PPU -CFLAGS "-std=c++17"
 	@touch .stamp.verilate_PPU
 
+waves_BFU: waveform_BFU.vcd
+	@echo
+	@echo "## WAVES ##"
+	gtkwave waveform_BFU.vcd
+
+sim_BFU: waveform_BFU.vcd
+
+waveform_BFU.vcd: ./obj_dir_BFU/VBFU
+	@./obj_dir_BFU/VBFU
+
+./obj_dir_BFU/VBFU: .stamp.verilate_BFU
+	@make -C obj_dir_BFU -f VBFU.mk VBFU
+
+.stamp.verilate_BFU: BFU.sv tb_BFU.cpp
+	verilator -Wall --trace -cc BFU.sv --top-module BFU --exe tb_BFU.cpp verilatorTB.cpp --Mdir obj_dir_BFU -CFLAGS "-std=c++17"
+	@touch .stamp.verilate_BFU
+
