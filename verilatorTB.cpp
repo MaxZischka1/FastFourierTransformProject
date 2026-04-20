@@ -11,11 +11,3 @@ void check(const char *name, int actual, int expected, int cycle){
         error_count++;
     }
 }
-void evalEnd(int errorCount){
-    if (error_count == 0)
-    {
-        printf("PassedTB");
-    } else{
-        printf("Failed with %d error\n", error_count);
-    }
-}

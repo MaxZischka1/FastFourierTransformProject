@@ -20,7 +20,6 @@ module TopLevel( //made the change where addresses now index from 0 to 7 instead
     output logic [7:0] waddr2Out,
     output logic [15:0] BFUREout,
     output logic [15:0] BFUREinOut,
-    output logic changeOut,
     output logic readMemSelOut,
     output logic [7:0] raddr1Out,
     output logic [7:0] raddr2Out,
@@ -28,21 +27,8 @@ module TopLevel( //made the change where addresses now index from 0 to 7 instead
     output logic weADDRen2Out
 );
 
-
-logic doneSigIB;
-// logic doneSigPP;
-
-
 //input bridge logic and regs
-
-logic [7:0] addressOutIn;
-logic transmitSigIB;
-
-always @(posedge clk) begin
-    if(doneSigIB) change <= 1;
-end
 logic change;
-assign changeOut = change;
 logic readMemSel;
 //BFU output reg
 logic [15:0] BFUoutRE;
@@ -70,8 +56,8 @@ assign rdata2IMO = rdata2IM;
 logic weADDRen1PP;
 logic [15:0] wdata1RE;
 assign wdata1RE = (change?BFUoutRE:ram1Output);
-assign waddr1 = change?waddr1PP:addressOutIn;
-assign  weADDRen1 = (change?weADDRen1PP:transmitSigIB);
+assign waddr1 = waddr1PP;
+assign  weADDRen1 = weADDRen1PP;
 //output regs for write address
 assign waddr1Out = waddr1;
 assign waddr2Out = waddr2;
@@ -91,10 +77,11 @@ assign weADDRen2Out = weADDRen2;
 //pipelining the outputs of 
 
 
-inputBridge testInBridge(.clk(clk), .startSig(startSig), .address(addressOutIn), .transmitSig(transmitSigIB), .doneSig(doneSigIB));
-PPU PP1(.clk(clk), .startSig(doneSigIB), .waddr1(waddr1PP), .waddr2(waddr2), .raddr1(raddr1), .raddr2(raddr2), 
-.weADDRen1(weADDRen1PP), .weADDRen2(weADDRen2), .readMemSel(readMemSel));
-testEEPROM EEPROM(.address(addressOutIn), .sampleIn(ram1Output)); //change .WDATA to be multiplexer for when pingpong
+
+PPU PP1(.clk(clk), .startSigIN(startSig), .waddr1(waddr1PP), .waddr2(waddr2), .raddr1(raddr1), .raddr2(raddr2), 
+.weADDRen1(weADDRen1PP), .weADDRen2(weADDRen2), .readMemSel(readMemSel), .change(change));
+
+testEEPROM EEPROM(.address(waddr1PP), .sampleIn(ram1Output)); //change .WDATA to be multiplexer for when pingpong
 BRAM bram1RE(.wdata(wdata1RE), .waddr(waddr1), .we(weADDRen1), .clk(clk), .raddr(raddr1), .rdata(rdata1RE));
 BRAM bram1IM(.wdata(BFUoutIM), .waddr(waddr1), .we(weADDRen1), .clk(clk), .raddr(raddr1), .rdata(rdata1IM));
 BRAM bram2RE(.wdata(BFUoutRE), .waddr(waddr2), .we(weADDRen2), .clk(clk), .raddr(raddr2), .rdata(rdata2RE));

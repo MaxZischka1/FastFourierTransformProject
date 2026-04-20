@@ -36,13 +36,18 @@ always_comb begin
 end
 
 always @(posedge clk) begin
-    
-    if(state==TRANSMITTING)
-        if(address != 8)
-            address <= address + 1;
-        else begin
-            address <= 1;
-            totCount <= totCount + 1;
+     case(state)
+        TRANSMITTING:begin
+            if(address != 8)
+                address <= address + 1;
+            else begin
+                address <= 0;
+                totCount <= totCount + 1;
         end
+        end
+        default: begin
+            address <= 0;
+        end
+     endcase 
     end
 endmodule

@@ -1,8 +1,10 @@
 # Verilator output
 obj_dir_bram/
 obj_dir_TL/
+obj_dir_PPU/
 .stamp.verilate
 .stamp.verilate_bram
+.stamp.verilate_PPU
 
 
 # Waveform files
