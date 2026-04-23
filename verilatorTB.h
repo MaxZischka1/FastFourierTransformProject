@@ -34,9 +34,9 @@ int finish(TB1 *tb, TV1 *tfp){
     tb->final();
     tfp->close();
     if(error_count==0){
-        printf("PassedTB");
+        printf("PassedTB\n");
     }else{
-        printf("Failed with %d errors", error_count);
+        printf("Failed with %d errors\n", error_count);
     }
     delete tb;
     delete tfp;

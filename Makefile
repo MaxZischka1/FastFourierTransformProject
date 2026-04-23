@@ -1,5 +1,5 @@
 MODULE=TopLevel
-SRCS = $(MODULE).sv inputBridge.sv testEEPROM.sv BRAM.sv PPU.sv BFU.sv
+SRCS = $(MODULE).sv testEEPROM.sv BRAM.sv PPU.sv BFU.sv
 
 .PHONY:sim
 sim: waveform_TopLevel.vcd
