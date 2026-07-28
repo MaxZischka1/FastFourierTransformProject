@@ -1,5 +1,7 @@
 MODULE=TopLevel
 SRCS = $(MODULE).sv testEEPROM.sv BRAM.sv PPU.sv BFU.sv
+ICE40_CELLS = /opt/homebrew/share/yosys/ice40/cells_sim.v
+
 
 .PHONY:sim
 sim: waveform_TopLevel.vcd
@@ -98,4 +100,21 @@ waveform_BFU.vcd: ./obj_dir_BFU/VBFU
 .stamp.verilate_BFU: BFU.sv tb_BFU.cpp
 	verilator -Wall --trace -cc BFU.sv --top-module BFU --exe tb_BFU.cpp verilatorTB.cpp --Mdir obj_dir_BFU -CFLAGS "-std=c++17"
 	@touch .stamp.verilate_BFU
+
+waves_SBM16: waveform_SBM16.vcd
+	@echo
+	@echo "## WAVES ##"
+	gtkwave waveform_SBM16.vcd
+
+sim_SBM16: waveform_SBM16.vcd
+
+waveform_SBM16.vcd: ./obj_dir_SBM16/VSBM16
+	@./obj_dir_SBM16/VSBM16
+
+./obj_dir_SBM16/VSBM16: .stamp.verilate_SBM16
+	@make -C obj_dir_SBM16 -f VSBM16.mk VSBM16
+
+.stamp.verilate_SBM16: SBM16.sv tb_SBM16.cpp
+	verilator -Wall --trace -cc SBM16.sv --top-module SBM16 --exe tb_SBM16.cpp verilatorTB.cpp --Mdir obj_dir_SBM16 -CFLAGS "-DVERILATOR -std=c++17"
+	@touch .stamp.verilate_SBM16
 

@@ -8,12 +8,12 @@ extern int error_count;
 
 template <typename T>
 void tick(T *tb, VerilatedVcdC *tfp){ 
-    tb->clk = 1;
+    tb->clk = 0;
     tb->eval();
     tfp->dump(main_time);
     main_time += 5;
-
-    tb->clk = 0;
+    
+    tb->clk = 1;
     tb->eval();
     tfp->dump(main_time);
     main_time += 5;
