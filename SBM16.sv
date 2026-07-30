@@ -6,34 +6,36 @@ module SBM16(
     input logic signed [15:0] WInIM,
     input logic signed [15:0] d2InRE,
     input logic signed [15:0] d2InIM,
-    output logic signed [31:0] dataOutRE32,
-    output logic signed [31:0] dataOutIM32
+    output logic signed [31:0] dataOutIM,
+    output logic signed [31:0] dataOutRE
+    
+
 
 );
 `ifdef VERILATOR
 /* verilator lint_off UNUSEDSIGNAL */
-logic signed [15:0] dataOutRE, dataOutIM;
-logic signed [32:0] interMedRE, interMedIM;
+logic signed [31:0] interMedRE, interMedIM;
 logic signed [16:0] sumRE, sumIM;
 /* verilator lint_on UNUSEDSIGNAL */
 
 assign interMedRE = (d1InRE*WInRE - d1InIM*WInIM);
 assign interMedIM = (d1InRE*WInIM + d1InIM*WInRE);
 
-assign sumRE = ($signed(interMedRE[32:17]) + $signed(d2InRE));
-assign sumIM = ($signed(interMedIM[32:17]) + $signed(d2InIM));
+assign sumRE = ($signed(interMedRE[31:15]) + $signed({d2InRE[15],d2InRE}));
+assign sumIM = ($signed(interMedIM[31:15]) +  $signed({d2InIM[15],d2InIM}));
 
-assign dataOutRE = sumRE[16:1]; //holding real 19bit values.
-assign dataOutIM = sumIM[16:1];
+    
+
     always_ff @(posedge clk) begin
-        dataOutRE32 <= {{16{dataOutRE[15]}}, dataOutRE};
-        dataOutIM32 <= {{16{dataOutIM[15]}}, dataOutIM};
+        dataOutRE <= {{16{sumRE[16]}},sumRE[16:1]}; 
+        dataOutIM <= {{16{sumIM[16]}},sumIM[16:1]};
+       
     end
     
      
 `else//TO DO : Implement a SBMAC16 use 4 DSPs 2 for multiplication and two accumulation. (I can't think of a more effecient approach)
     logic signed[31:0] dspInterRE, dspInterRENeg, dspInterIM;
-    logic signed[32:0] dspOutRE, dspOutIM;
+    logic signed[31:0] dspOutRE, dspOutIM;
     logic signed [16:0] sumRE, sumIM;
     
 //DSP Block #1: 16x16 Multiplication and nothing else.
@@ -53,10 +55,10 @@ assign dataOutIM = sumIM[16:1];
                 .CLK(clk),
                 .A(d1InIM),
                 .B(WInIM),
-                .C(),
-                .D(),
-                .O(dspInterRE),
-                .CO()
+                .C(16'd0),
+                .D(16'd0),
+                .O(dspInterRE)
+                
         );
 //DSP Block #2 does a 16x16 mult and then accumlates with the output of the first output
     assign dspInterRENeg = (~dspInterRE)+1;//apply complement
@@ -70,14 +72,15 @@ assign dataOutIM = sumIM[16:1];
                 .BOTADDSUB_UPPERINPUT(1'b1),// input D
                 .A_SIGNED(1'b1),
                 .B_SIGNED(1'b1) 
-    ) mult16x16_addRE(
+    ) mult16x16_subRE(
                 .CLK(clk),
                 .A(d1InRE),
                 .B(WInRE),
-                .C(dspInter1Neg[31:16]),
-                .D(dspInter1Neg[15:0]),
+                .C(dspInter1[31:16]),
+                .D(dspInter1[15:0]),
                 .O(dspOutRE[31:0]),
-                .CO(dspOutRE[32])
+                .ADDSUBBOT(1'b1),//subtract
+                .ADDSUBTOP(1'b1)
         );
 //DSP Block #3 and #4 repeats blocks for complement
 SB_MAC16 #(
@@ -95,10 +98,9 @@ SB_MAC16 #(
                 .CLK(clk),
                 .A(d1InRE),
                 .B(WInIM),
-                .C(),
-                .D(),
-                .O(dspInterIM),
-                .CO()
+                .C(16'd0),
+                .D(16'd0),
+                .O(dspInterIM)
         );
 //DSP Block #2 does a 16x16 mult and then accumlates with the output of the first output
     SB_MAC16 #(
@@ -117,14 +119,13 @@ SB_MAC16 #(
                 .B(WInRE),
                 .C(dspInterIM[31:16]),
                 .D(dspInterIM[15:0]),
-                .O(dspOutIM[31:0]),
-                .CO(dspOutIM[32])
-        );
+                .O(dspOutIM[31:0])        
+                );
 
-        assign sumIM = (dspOutIM[32:17] + d2InIM);
-        assign sumRE = (dspOutRE[32:17] + d2InRE);
-        assign d2InRE = sumRE[16:1];
-        assign d2InIM = sumIM[16:1];
+        assign sumIM = (dspOutIM[32:16] + {d2InIM[15],d2InIM});
+        assign sumRE = (dspOutRE[32:16] + {d2InRE[15],d2InRE});
+        assign dataOutRE = sumRE[16:1];
+        assign dataOutIM = sumIM[16:1];
 
 //Feed outputs into a 16 bit adder made from LUTs. Try to implement two BFUs in architechture.
 `endif

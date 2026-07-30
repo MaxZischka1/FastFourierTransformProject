@@ -20,7 +20,7 @@ class SBMTxIn{
 //Transaction Item Output
 class SBMTxOut{
     public:
-        int outRE, outIM;
+        int16_t outRE, outIM;
 };
 //Transaction Item Generator(Random generator between 32767,-326718)
 SBMTxIn* SBMTxGen(){
@@ -29,12 +29,19 @@ SBMTxIn* SBMTxGen(){
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distrib1(-32767, 32766); 
     std::uniform_real_distribution<double> ang(0, M_PI*2.0);
-    tx->evRE = distrib1(gen);
-    tx->evIM = distrib1(gen);
-    tx->oddRE = distrib1(gen);
-    tx->oddIM = distrib1(gen);
-    tx->omgRE = (cos(ang(gen))*32766.0);
-    tx->omgIM = (sin(ang(gen))*32766.0);
+    int evRE = distrib1(gen);
+    int evIM = distrib1(gen);
+    int oddRE = distrib1(gen);
+    int oddIM = distrib1(gen);
+    bool evMag = (((int64_t)evRE*evRE + (int64_t)evIM*evIM)< 32767LL*32767LL);
+    bool oddMag = (((int64_t)oddRE*oddRE + (int64_t)oddIM*oddIM)< 32767LL*32767LL);
+    tx->evRE = evMag?evRE:0;
+    tx->evIM = evMag?evIM:0;
+    tx->oddRE = oddMag?oddRE:0;
+    tx->oddIM = oddMag?oddIM:0;
+    double angleGen = ang(gen);
+    tx->omgRE = (cos(angleGen)*32766.0);
+    tx->omgIM = (sin(angleGen)*32766.0);
     return tx;
 };
 
@@ -78,8 +85,8 @@ class SBM16Scb{
             int64_t interRe = ((int64_t)in->oddRE*in->omgRE - (int64_t)in->oddIM * in->omgIM);
             int64_t interIM = ((int64_t)in->oddRE*in->omgIM + (int64_t)in->oddIM*in->omgRE);
             
-            int interReSh = interRe>>17;
-            int interIMSh = interIM>>17;
+            int interReSh = interRe>>15;
+            int interIMSh = interIM>>15;
 
             int outRE = (interReSh+in->evRE)>>1;
             int outIM = (interIMSh+in->evIM)>>1;
@@ -138,8 +145,8 @@ class SBM16MonOut{
         }
         void monitor(){
             SBMTxOut *tx = new SBMTxOut;
-            tx->outRE = dut->dataOutRE32;
-            tx->outIM = dut->dataOutIM32;
+            tx->outRE = dut->dataOutRE;
+            tx->outIM = dut->dataOutIM;
             scb->writeOut(tx);
         }
 };

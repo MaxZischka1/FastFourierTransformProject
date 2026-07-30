@@ -15,6 +15,8 @@ class alignas(VL_CACHE_LINE_BYTES) VSBM16___024root final {
 
     // DESIGN SPECIFIC STATE
     VL_IN8(clk,0,0);
+    CData/*0:0*/ __VstlFirstIteration;
+    CData/*0:0*/ __VicoFirstIteration;
     CData/*0:0*/ __Vtrigprevexpr___TOP__clk__0;
     VL_IN16(d1InRE,15,0);
     VL_IN16(d1InIM,15,0);
@@ -22,9 +24,13 @@ class alignas(VL_CACHE_LINE_BYTES) VSBM16___024root final {
     VL_IN16(WInIM,15,0);
     VL_IN16(d2InRE,15,0);
     VL_IN16(d2InIM,15,0);
-    VL_OUT(dataOutRE32,31,0);
-    VL_OUT(dataOutIM32,31,0);
+    VL_OUT(dataOutIM,31,0);
+    VL_OUT(dataOutRE,31,0);
+    IData/*16:0*/ SBM16__DOT__sumRE;
+    IData/*16:0*/ SBM16__DOT__sumIM;
     IData/*31:0*/ __VactIterCount;
+    VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
+    VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;
 
