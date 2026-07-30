@@ -58,8 +58,8 @@ VL_ATTR_COLD void VSBM16___024root___ctor_var_reset(VSBM16___024root* vlSelf) {
     vlSelf->WInIM = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 615623189748249843ull);
     vlSelf->d2InRE = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 1465868360269702402ull);
     vlSelf->d2InIM = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 6021060780541280614ull);
-    vlSelf->dataOutRE = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 16008428910837689854ull);
-    vlSelf->dataOutIM = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 8582329364871988122ull);
+    vlSelf->dataOutRE32 = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 9941801836915677177ull);
+    vlSelf->dataOutIM32 = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 16988578381388256926ull);
     for (int __Vi0 = 0; __Vi0 < 1; ++__Vi0) {
         vlSelf->__VactTriggered[__Vi0] = 0;
     }

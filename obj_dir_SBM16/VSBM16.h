@@ -36,8 +36,8 @@ class alignas(VL_CACHE_LINE_BYTES) VSBM16 VL_NOT_FINAL : public VerilatedModel {
     VL_IN16(&WInIM,15,0);
     VL_IN16(&d2InRE,15,0);
     VL_IN16(&d2InIM,15,0);
-    VL_OUT16(&dataOutRE,15,0);
-    VL_OUT16(&dataOutIM,15,0);
+    VL_OUT(&dataOutRE32,31,0);
+    VL_OUT(&dataOutIM32,31,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.

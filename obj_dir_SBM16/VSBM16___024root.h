@@ -22,8 +22,8 @@ class alignas(VL_CACHE_LINE_BYTES) VSBM16___024root final {
     VL_IN16(WInIM,15,0);
     VL_IN16(d2InRE,15,0);
     VL_IN16(d2InIM,15,0);
-    VL_OUT16(dataOutRE,15,0);
-    VL_OUT16(dataOutIM,15,0);
+    VL_OUT(dataOutRE32,31,0);
+    VL_OUT(dataOutIM32,31,0);
     IData/*31:0*/ __VactIterCount;
     VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;

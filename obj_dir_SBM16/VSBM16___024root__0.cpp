@@ -44,22 +44,84 @@ void VSBM16___024root___nba_sequent__TOP__0(VSBM16___024root* vlSelf) {
     VSBM16__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.dataOutRE = (0x0000ffffU & (((VL_MULS_III(32, 
-                                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))) 
-                                            - VL_MULS_III(32, 
-                                                          VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                                          VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM)))) 
-                                           >> 0x0fU) 
-                                          + (IData)(vlSelfRef.d2InRE)));
-    vlSelfRef.dataOutIM = (0x0000ffffU & (((VL_MULS_III(32, 
-                                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))) 
-                                            + VL_MULS_III(32, 
-                                                          VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                                          VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE)))) 
-                                           >> 0x0fU) 
-                                          + (IData)(vlSelfRef.d2InIM)));
+    vlSelfRef.dataOutRE32 = (((- (IData)((1U & ((VL_EXTENDS_II(17,16, 
+                                                               (0x0000ffffU 
+                                                                & (IData)(
+                                                                          (0x000000000000ffffULL 
+                                                                           & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE)))) 
+                                                                               - 
+                                                                               VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM))))) 
+                                                                              >> 0x00000011U))))) 
+                                                 + 
+                                                 VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InRE))) 
+                                                >> 0x00000010U)))) 
+                              << 0x00000010U) | (0x0000ffffU 
+                                                 & ((VL_EXTENDS_II(17,16, 
+                                                                   (0x0000ffffU 
+                                                                    & (IData)(
+                                                                              (0x000000000000ffffULL 
+                                                                               & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE)))) 
+                                                                                - 
+                                                                                VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM))))) 
+                                                                                >> 0x00000011U))))) 
+                                                     + 
+                                                     VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InRE))) 
+                                                    >> 1U)));
+    vlSelfRef.dataOutIM32 = (((- (IData)((1U & ((VL_EXTENDS_II(17,16, 
+                                                               (0x0000ffffU 
+                                                                & (IData)(
+                                                                          (0x000000000000ffffULL 
+                                                                           & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM)))) 
+                                                                               + 
+                                                                               VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE))))) 
+                                                                              >> 0x00000011U))))) 
+                                                 + 
+                                                 VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InIM))) 
+                                                >> 0x00000010U)))) 
+                              << 0x00000010U) | (0x0000ffffU 
+                                                 & ((VL_EXTENDS_II(17,16, 
+                                                                   (0x0000ffffU 
+                                                                    & (IData)(
+                                                                              (0x000000000000ffffULL 
+                                                                               & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM)))) 
+                                                                                + 
+                                                                                VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE))))) 
+                                                                                >> 0x00000011U))))) 
+                                                     + 
+                                                     VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InIM))) 
+                                                    >> 1U)));
 }
 
 void VSBM16___024root___eval_nba(VSBM16___024root* vlSelf) {

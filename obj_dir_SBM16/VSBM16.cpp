@@ -17,8 +17,8 @@ VSBM16::VSBM16(VerilatedContext* _vcontextp__, const char* _vcname__)
     , WInIM{vlSymsp->TOP.WInIM}
     , d2InRE{vlSymsp->TOP.d2InRE}
     , d2InIM{vlSymsp->TOP.d2InIM}
-    , dataOutRE{vlSymsp->TOP.dataOutRE}
-    , dataOutIM{vlSymsp->TOP.dataOutIM}
+    , dataOutRE32{vlSymsp->TOP.dataOutRE32}
+    , dataOutIM32{vlSymsp->TOP.dataOutIM32}
     , rootp{&(vlSymsp->TOP)}
 {
     // Register model with the context

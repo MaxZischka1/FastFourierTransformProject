@@ -29,16 +29,96 @@ void VSBM16___024root__trace_chg_0_sub_0(VSBM16___024root* vlSelf, VerilatedVcd:
     bufp->chgSData(oldp+4,(vlSelfRef.WInIM),16);
     bufp->chgSData(oldp+5,(vlSelfRef.d2InRE),16);
     bufp->chgSData(oldp+6,(vlSelfRef.d2InIM),16);
-    bufp->chgSData(oldp+7,(vlSelfRef.dataOutRE),16);
-    bufp->chgSData(oldp+8,(vlSelfRef.dataOutIM),16);
-    bufp->chgIData(oldp+9,((VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))) 
-                            - VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                          VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))))),32);
-    bufp->chgIData(oldp+10,((VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                         VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))) 
-                             + VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                           VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))))),32);
+    bufp->chgIData(oldp+7,(vlSelfRef.dataOutRE32),32);
+    bufp->chgIData(oldp+8,(vlSelfRef.dataOutIM32),32);
+    bufp->chgSData(oldp+9,((0x0000ffffU & ((VL_EXTENDS_II(17,16, 
+                                                          (0x0000ffffU 
+                                                           & (IData)(
+                                                                     (0x000000000000ffffULL 
+                                                                      & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE)))) 
+                                                                          - 
+                                                                          VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM))))) 
+                                                                         >> 0x00000011U))))) 
+                                            + VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InRE))) 
+                                           >> 1U))),16);
+    bufp->chgSData(oldp+10,((0x0000ffffU & ((VL_EXTENDS_II(17,16, 
+                                                           (0x0000ffffU 
+                                                            & (IData)(
+                                                                      (0x000000000000ffffULL 
+                                                                       & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM)))) 
+                                                                           + 
+                                                                           VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE))))) 
+                                                                          >> 0x00000011U))))) 
+                                             + VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InIM))) 
+                                            >> 1U))),16);
+    bufp->chgQData(oldp+11,((0x00000001ffffffffULL 
+                             & (VL_MULS_QQQ(33, (0x00000001ffffffffULL 
+                                                 & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                            (0x00000001ffffffffULL 
+                                             & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE)))) 
+                                - VL_MULS_QQQ(33, (0x00000001ffffffffULL 
+                                                   & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                              (0x00000001ffffffffULL 
+                                               & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM))))))),33);
+    bufp->chgQData(oldp+13,((0x00000001ffffffffULL 
+                             & (VL_MULS_QQQ(33, (0x00000001ffffffffULL 
+                                                 & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                            (0x00000001ffffffffULL 
+                                             & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM)))) 
+                                + VL_MULS_QQQ(33, (0x00000001ffffffffULL 
+                                                   & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                              (0x00000001ffffffffULL 
+                                               & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE))))))),33);
+    bufp->chgIData(oldp+15,((0x0001ffffU & (VL_EXTENDS_II(17,16, 
+                                                          (0x0000ffffU 
+                                                           & (IData)(
+                                                                     (0x000000000000ffffULL 
+                                                                      & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE)))) 
+                                                                          - 
+                                                                          VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM))))) 
+                                                                         >> 0x00000011U))))) 
+                                            + VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InRE))))),17);
+    bufp->chgIData(oldp+16,((0x0001ffffU & (VL_EXTENDS_II(17,16, 
+                                                          (0x0000ffffU 
+                                                           & (IData)(
+                                                                     (0x000000000000ffffULL 
+                                                                      & ((VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InRE))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInIM)))) 
+                                                                          + 
+                                                                          VL_MULS_QQQ(33, 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.d1InIM))), 
+                                                                                (0x00000001ffffffffULL 
+                                                                                & VL_EXTENDS_QI(33,16, (IData)(vlSelfRef.WInRE))))) 
+                                                                         >> 0x00000011U))))) 
+                                            + VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InIM))))),17);
 }
 
 void VSBM16___024root__trace_cleanup(void* voidSelf, VerilatedVcd* /*unused*/) {
