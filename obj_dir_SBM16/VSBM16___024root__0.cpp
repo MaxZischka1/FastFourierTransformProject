@@ -44,34 +44,30 @@ void VSBM16___024root___ico_sequent__TOP__0(VSBM16___024root* vlSelf) {
     VSBM16__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.SBM16__DOT__sumRE = (0x0001ffffU & ((
-                                                   (VL_MULS_III(32, 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))) 
-                                                    - 
-                                                    VL_MULS_III(32, 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM)))) 
-                                                   >> 0x0000000fU) 
-                                                  + 
-                                                  ((0x00010000U 
-                                                    & ((IData)(vlSelfRef.d2InRE) 
-                                                       << 1U)) 
-                                                   | (IData)(vlSelfRef.d2InRE))));
-    vlSelfRef.SBM16__DOT__sumIM = (0x0001ffffU & ((
-                                                   (VL_MULS_III(32, 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))) 
-                                                    + 
-                                                    VL_MULS_III(32, 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                                                VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE)))) 
-                                                   >> 0x0000000fU) 
-                                                  + 
-                                                  ((0x00010000U 
-                                                    & ((IData)(vlSelfRef.d2InIM) 
-                                                       << 1U)) 
-                                                   | (IData)(vlSelfRef.d2InIM))));
+    vlSelfRef.SBM16__DOT__sumEvRE = (0x0001ffffU & 
+                                     (VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d1InRE)) 
+                                      + VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InRE))));
+    vlSelfRef.SBM16__DOT__sumEvIM = (0x0001ffffU & 
+                                     (VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d1InIM)) 
+                                      + VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InIM))));
+    vlSelfRef.SBM16__DOT__interRE1 = (0x0001ffffU & 
+                                      (VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d1InRE)) 
+                                       - VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InRE))));
+    vlSelfRef.SBM16__DOT__interIM1 = (0x0001ffffU & 
+                                      (VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d1InIM)) 
+                                       - VL_EXTENDS_II(17,16, (IData)(vlSelfRef.d2InIM))));
+    vlSelfRef.SBM16__DOT__interOdd2MRE = (VL_MULS_III(32, 
+                                                      VL_EXTENDS_II(32,17, vlSelfRef.SBM16__DOT__interRE1), 
+                                                      VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))) 
+                                          - VL_MULS_III(32, 
+                                                        VL_EXTENDS_II(32,17, vlSelfRef.SBM16__DOT__interIM1), 
+                                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))));
+    vlSelfRef.SBM16__DOT__interOdd2MIM = (VL_MULS_III(32, 
+                                                      VL_EXTENDS_II(32,17, vlSelfRef.SBM16__DOT__interRE1), 
+                                                      VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))) 
+                                          + VL_MULS_III(32, 
+                                                        VL_EXTENDS_II(32,17, vlSelfRef.SBM16__DOT__interIM1), 
+                                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))));
 }
 
 void VSBM16___024root___eval_ico(VSBM16___024root* vlSelf) {
@@ -81,6 +77,7 @@ void VSBM16___024root___eval_ico(VSBM16___024root* vlSelf) {
     // Body
     if ((1ULL & vlSelfRef.__VicoTriggered[0U])) {
         VSBM16___024root___ico_sequent__TOP__0(vlSelf);
+        vlSelfRef.__Vm_traceActivity[1U] = 1U;
     }
 }
 
@@ -139,16 +136,24 @@ void VSBM16___024root___nba_sequent__TOP__0(VSBM16___024root* vlSelf) {
     VSBM16__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    vlSelfRef.dataOutRE = (((- (IData)((1U & (vlSelfRef.SBM16__DOT__sumRE 
-                                              >> 0x10U)))) 
-                            << 0x00000010U) | (0x0000ffffU 
-                                               & (vlSelfRef.SBM16__DOT__sumRE 
-                                                  >> 1U)));
-    vlSelfRef.dataOutIM = (((- (IData)((1U & (vlSelfRef.SBM16__DOT__sumIM 
-                                              >> 0x10U)))) 
-                            << 0x00000010U) | (0x0000ffffU 
-                                               & (vlSelfRef.SBM16__DOT__sumIM 
-                                                  >> 1U)));
+    vlSelfRef.dOutEvRE = (((- (IData)((1U & (vlSelfRef.SBM16__DOT__sumEvRE 
+                                             >> 0x10U)))) 
+                           << 0x00000010U) | (0x0000ffffU 
+                                              & (vlSelfRef.SBM16__DOT__sumEvRE 
+                                                 >> 1U)));
+    vlSelfRef.dOutEvIM = (((- (IData)((1U & (vlSelfRef.SBM16__DOT__sumEvIM 
+                                             >> 0x10U)))) 
+                           << 0x00000010U) | (0x0000ffffU 
+                                              & (vlSelfRef.SBM16__DOT__sumEvIM 
+                                                 >> 1U)));
+    vlSelfRef.dOutOddRE = (((- (IData)((vlSelfRef.SBM16__DOT__interOdd2MRE 
+                                        >> 0x1fU))) 
+                            << 0x00000010U) | (vlSelfRef.SBM16__DOT__interOdd2MRE 
+                                               >> 0x10U));
+    vlSelfRef.dOutOddIM = (((- (IData)((vlSelfRef.SBM16__DOT__interOdd2MIM 
+                                        >> 0x1fU))) 
+                            << 0x00000010U) | (vlSelfRef.SBM16__DOT__interOdd2MIM 
+                                               >> 0x10U));
 }
 
 void VSBM16___024root___eval_nba(VSBM16___024root* vlSelf) {
@@ -225,7 +230,7 @@ void VSBM16___024root___eval(VSBM16___024root* vlSelf) {
 #ifdef VL_DEBUG
             VSBM16___024root___dump_triggers__ico(vlSelfRef.__VicoTriggered, "ico"s);
 #endif
-            VL_FATAL_MT("SBM16.sv", 1, "", "Input combinational region did not converge after 100 tries");
+            VL_FATAL_MT("SBM16.sv", 6, "", "Input combinational region did not converge after 100 tries");
         }
         __VicoIterCount = ((IData)(1U) + __VicoIterCount);
     } while (VSBM16___024root___eval_phase__ico(vlSelf));
@@ -235,7 +240,7 @@ void VSBM16___024root___eval(VSBM16___024root* vlSelf) {
 #ifdef VL_DEBUG
             VSBM16___024root___dump_triggers__act(vlSelfRef.__VnbaTriggered, "nba"s);
 #endif
-            VL_FATAL_MT("SBM16.sv", 1, "", "NBA region did not converge after 100 tries");
+            VL_FATAL_MT("SBM16.sv", 6, "", "NBA region did not converge after 100 tries");
         }
         __VnbaIterCount = ((IData)(1U) + __VnbaIterCount);
         vlSelfRef.__VactIterCount = 0U;
@@ -244,7 +249,7 @@ void VSBM16___024root___eval(VSBM16___024root* vlSelf) {
 #ifdef VL_DEBUG
                 VSBM16___024root___dump_triggers__act(vlSelfRef.__VactTriggered, "act"s);
 #endif
-                VL_FATAL_MT("SBM16.sv", 1, "", "Active region did not converge after 100 tries");
+                VL_FATAL_MT("SBM16.sv", 6, "", "Active region did not converge after 100 tries");
             }
             vlSelfRef.__VactIterCount = ((IData)(1U) 
                                          + vlSelfRef.__VactIterCount);

@@ -20,14 +20,14 @@ class SBMTxIn{
 //Transaction Item Output
 class SBMTxOut{
     public:
-        int16_t outRE, outIM;
+        int16_t outEvRE, outEvIM, outOddRE, outOddIM;
 };
 //Transaction Item Generator(Random generator between 32767,-326718)
 SBMTxIn* SBMTxGen(){
     SBMTxIn *tx = new SBMTxIn();
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> distrib1(-32767, 32766); 
+    std::uniform_int_distribution<int> distrib1(-32768, 32767); 
     std::uniform_real_distribution<double> ang(0, M_PI*2.0);
     int evRE = distrib1(gen);
     int evIM = distrib1(gen);
@@ -40,8 +40,8 @@ SBMTxIn* SBMTxGen(){
     tx->oddRE = oddMag?oddRE:0;
     tx->oddIM = oddMag?oddIM:0;
     double angleGen = ang(gen);
-    tx->omgRE = (cos(angleGen)*32766.0);
-    tx->omgIM = (sin(angleGen)*32766.0);
+    tx->omgRE = (cos(angleGen)*32767.0);
+    tx->omgIM = (sin(angleGen)*32767.0);
     return tx;
 };
 
@@ -81,24 +81,30 @@ class SBM16Scb{
             SBMTxIn *in;
             in = in_q.front();
             in_q.pop_front();
+            int sumEvRE = ((int)in->evRE+(int)in->oddRE)>>1;
+            int sumEvIM = ((int)in->evIM+(int)in->oddIM)>>1;
 
-            int64_t interRe = ((int64_t)in->oddRE*in->omgRE - (int64_t)in->oddIM * in->omgIM);
-            int64_t interIM = ((int64_t)in->oddRE*in->omgIM + (int64_t)in->oddIM*in->omgRE);
-            
-            int interReSh = interRe>>15;
-            int interIMSh = interIM>>15;
+            int interOddRE1 = (in->oddRE - in->evRE);
+            int interOddIM1 = (in->oddIM - in->evIM);
 
-            int outRE = (interReSh+in->evRE)>>1;
-            int outIM = (interIMSh+in->evIM)>>1;
+            int64_t interOddRE2 = (int64_t)(interOddRE1*in->omgRE -  interOddIM1*in->omgIM);
+            int64_t interOddIM2 = (int64_t)(interOddRE1*in->omgIM +  interOddIM1*in->omgRE);
 
-            if((outRE == tx->outRE) &&
-            (outIM == tx->outIM))
-        {
+            int sumOddRE = (int)(interOddRE2>>16);
+            int sumOddIM = (int)(interOddIM2>>16);
+
+
+
+
+            //TO DO: Implement full scoreboard and output.
+        if
+            ((sumEvRE==tx->outEvRE)&&(sumEvIM==tx->outEvIM)&&
+            (sumOddRE==tx->outOddRE)&&(sumOddIM==tx->outOddIM)){
             std::cout << "TestBench Success" << std::endl;
         }else{
             std::cout <<"TestBench Error" <<std::endl;
-            std::cout <<"Expected  outRE: "<<outRE<<"  outIM"<<outIM<<std::endl;
-            std::cout<<"Actual   outRE: "<<tx->outRE<<" outIM: "<<tx->outIM<<std::endl;
+            std::cout <<"Expected  outEvRE: "<<sumEvRE<<"  outEvIM:  "<<sumEvIM<<"  outOddRE:   "<<sumOddRE<<"  outOddIM:  "<<sumOddIM<<std::endl;
+            std::cout<<"Actual  outEvRE: "<<tx->outEvRE<<"  outEvIM:  "<<tx->outEvIM<<"  outOddRE:   "<<tx->outOddRE<<"  outOddIM:  "<<tx->outOddIM<<std::endl;
             std::cout<<"Inputs     oddRE: "<<in->oddRE <<" oddIM: "<<in->oddIM<<" evRE: "   
             <<in->evRE<<" evIM: "<<in->evIM<<" omgRE: "<<in->omgRE<<" omgIM: "<<in->omgIM<<std::endl;
              std::cout <<"Sim Time: "<<main_time<<std::endl;
@@ -145,8 +151,10 @@ class SBM16MonOut{
         }
         void monitor(){
             SBMTxOut *tx = new SBMTxOut;
-            tx->outRE = dut->dataOutRE;
-            tx->outIM = dut->dataOutIM;
+            tx->outEvRE = dut->dOutEvRE;
+            tx->outEvIM = dut->dOutEvIM;
+            tx->outOddRE = dut->dOutOddRE;
+            tx->outOddIM = dut->dOutOddIM;
             scb->writeOut(tx);
         }
 };
@@ -162,7 +170,7 @@ int main(int argc, char** argv){
     VerilatedVcdC *tfp = new VerilatedVcdC;
     setup(tb, tfp, argc, argv, "waveform_SBM16.vcd");
     SBMTxIn *tx;
-    int max_time = 200;
+    int max_time = 1000;
     
     SBMTxDrive *drv = new SBMTxDrive(tb);
     SBM16Scb *scb = new SBM16Scb();

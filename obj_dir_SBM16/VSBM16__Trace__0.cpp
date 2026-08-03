@@ -22,37 +22,33 @@ void VSBM16___024root__trace_chg_0_sub_0(VSBM16___024root* vlSelf, VerilatedVcd:
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
     uint32_t* const oldp VL_ATTR_UNUSED = bufp->oldp(vlSymsp->__Vm_baseCode + 1);
-    bufp->chgBit(oldp+0,(vlSelfRef.clk));
-    bufp->chgSData(oldp+1,(vlSelfRef.d1InRE),16);
-    bufp->chgSData(oldp+2,(vlSelfRef.d1InIM),16);
-    bufp->chgSData(oldp+3,(vlSelfRef.WInRE),16);
-    bufp->chgSData(oldp+4,(vlSelfRef.WInIM),16);
-    bufp->chgSData(oldp+5,(vlSelfRef.d2InRE),16);
-    bufp->chgSData(oldp+6,(vlSelfRef.d2InIM),16);
-    bufp->chgIData(oldp+7,(vlSelfRef.dataOutIM),32);
-    bufp->chgIData(oldp+8,(vlSelfRef.dataOutRE),32);
-    bufp->chgIData(oldp+9,((VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                        VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))) 
-                            - VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                          VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))))),32);
-    bufp->chgIData(oldp+10,((VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InRE)), 
-                                         VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInIM))) 
-                             + VL_MULS_III(32, VL_EXTENDS_II(32,16, (IData)(vlSelfRef.d1InIM)), 
-                                           VL_EXTENDS_II(32,16, (IData)(vlSelfRef.WInRE))))),32);
-    bufp->chgIData(oldp+11,(vlSelfRef.SBM16__DOT__sumRE),17);
-    bufp->chgIData(oldp+12,(vlSelfRef.SBM16__DOT__sumIM),17);
+    if (VL_UNLIKELY((vlSelfRef.__Vm_traceActivity[1U]))) {
+        bufp->chgIData(oldp+0,(vlSelfRef.SBM16__DOT__interRE1),17);
+        bufp->chgIData(oldp+1,(vlSelfRef.SBM16__DOT__interIM1),17);
+        bufp->chgIData(oldp+2,(vlSelfRef.SBM16__DOT__interOdd2MRE),32);
+        bufp->chgIData(oldp+3,(vlSelfRef.SBM16__DOT__interOdd2MIM),32);
+        bufp->chgIData(oldp+4,(vlSelfRef.SBM16__DOT__sumEvRE),17);
+        bufp->chgIData(oldp+5,(vlSelfRef.SBM16__DOT__sumEvIM),17);
+    }
+    bufp->chgBit(oldp+6,(vlSelfRef.clk));
+    bufp->chgSData(oldp+7,(vlSelfRef.d1InRE),16);
+    bufp->chgSData(oldp+8,(vlSelfRef.d1InIM),16);
+    bufp->chgSData(oldp+9,(vlSelfRef.WInRE),16);
+    bufp->chgSData(oldp+10,(vlSelfRef.WInIM),16);
+    bufp->chgSData(oldp+11,(vlSelfRef.d2InRE),16);
+    bufp->chgSData(oldp+12,(vlSelfRef.d2InIM),16);
+    bufp->chgIData(oldp+13,(vlSelfRef.dOutEvIM),32);
+    bufp->chgIData(oldp+14,(vlSelfRef.dOutEvRE),32);
+    bufp->chgIData(oldp+15,(vlSelfRef.dOutOddIM),32);
+    bufp->chgIData(oldp+16,(vlSelfRef.dOutOddRE),32);
 }
 
 void VSBM16___024root__trace_cleanup(void* voidSelf, VerilatedVcd* /*unused*/) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    VSBM16___024root__trace_cleanup\n"); );
-    // Locals
-    VlUnpacked<CData/*0:0*/, 1> __Vm_traceActivity;
-    for (int __Vi0 = 0; __Vi0 < 1; ++__Vi0) {
-        __Vm_traceActivity[__Vi0] = 0;
-    }
     // Body
     VSBM16___024root* const __restrict vlSelf VL_ATTR_UNUSED = static_cast<VSBM16___024root*>(voidSelf);
     VSBM16__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     vlSymsp->__Vm_activity = false;
-    __Vm_traceActivity[0U] = 0U;
+    vlSymsp->TOP.__Vm_traceActivity[0U] = 0U;
+    vlSymsp->TOP.__Vm_traceActivity[1U] = 0U;
 }

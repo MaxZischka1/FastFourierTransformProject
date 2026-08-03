@@ -3,6 +3,7 @@ obj_dir_bram/
 obj_dir_TL/
 obj_dir_PPU/
 obj_dir_BFU/
+obj_dir_SBM16/
 .stamp.verilate
 .stamp.verilate_bram
 .stamp.verilate_PPU

@@ -1,6 +1,9 @@
 //dual RAM ReadWrite setup //4 RAMs require for IM and RE one is always reading(prev vales) the other is writing(cur vals)
 //Initially use a UART transmission for signal DATA, hopefully move to ethernet.
+
 //Hypothetically logic starts in EEPROM or SPRAM we have to import. Sent via Serial or Ethernet
+
+//NEXT UP: Setup a decoder that feeds from a counter to output the bit reversed signals
 module PPU ( //current issue solving is getting address transition correct,
 //should go from 0 to 7 with other RAM staying at a consistant 0. May need an IF statement. Then start BFU construction
     input logic startSigIN,
@@ -12,7 +15,8 @@ module PPU ( //current issue solving is getting address transition correct,
     output logic weADDRen1,
     output logic weADDRen2, //only need one with a not gate
     output logic readMemSel, //0 for mem1, 1 for mem2
-    output logic change
+    output logic change,
+    output logic [1:0] stageNum
 );
 /*-----------------------INPUT BRIDGE SECTION-------------------------*/
 typedef enum logic [1:0]{ //This takes the input which I think I will save to some other RAM
@@ -97,14 +101,15 @@ states_read stater, next_stater;
 logic writeComp, readComp; //switch statements for when counters reach specific number
 logic [7:0] waddr1Buf, waddr2Buf, raddr1Buf, raddr2Buf, 
 waddr1BufP1, waddr1BufP2, waddr2BufP1, waddr2BufP2; //buffers for the outputs just to manipulate
-logic [3:0] iteratStep; //this is checking what iteration of FFT we are on.
+logic [1:0] iteratStep; //this is checking what iteration of FFT we are on.
+assign stageNum = iteratStep;
 //combinational transition logic
 assign readComp = (raddr1Buf==6||raddr2Buf==6);
 assign writeComp = (waddr1Buf==6||waddr2Buf==6);
 //output buffers
 assign raddr1 = raddr1Buf;
 assign raddr2 = raddr2Buf;
-assign waddr1 = change?waddr1BufP2:addressIn;
+assign waddr1 = change?waddr1BufP2:{addressIn[7:3],addressIn[0],addressIn[1], addressIn[2]};
 assign waddr2 = waddr2BufP2;
 //readmemSel
 logic readMemSelBuf, readMemSelBufP1;
@@ -127,7 +132,7 @@ always_comb begin //state trans block
         end
         //possibly include an intermediate state to zero out buffers
         WRITE1: begin
-            next_statew = states_write'((writeComp)?((iteratStep==6)?DONEW:WRITE2):WRITE1);
+            next_statew = states_write'((writeComp)?((iteratStep==2)?DONEW:WRITE2):WRITE1);
         end
         DONEW: begin
             next_statew = IDLEW;
@@ -146,7 +151,7 @@ always_comb begin //state trans block
         end
         //possibly include an intermediate state to zero out buffers
         READ2: begin
-            next_stater = states_read'((readComp)?((iteratStep==6)?DONER:READ1):READ2);
+            next_stater = states_read'((readComp)?((iteratStep==2)?DONER:READ1):READ2);
         end
         DONER:begin
             next_stater = IDLER;
@@ -237,6 +242,8 @@ always_ff @(posedge clk) begin //startSignal
     //readMem at same clock cycle as RAM
     readMemSelBufP1 <= readMemSelBuf;
 end
+
+
 
 endmodule
 

@@ -24,15 +24,24 @@ class alignas(VL_CACHE_LINE_BYTES) VSBM16___024root final {
     VL_IN16(WInIM,15,0);
     VL_IN16(d2InRE,15,0);
     VL_IN16(d2InIM,15,0);
-    VL_OUT(dataOutIM,31,0);
-    VL_OUT(dataOutRE,31,0);
-    IData/*16:0*/ SBM16__DOT__sumRE;
-    IData/*16:0*/ SBM16__DOT__sumIM;
+    VL_OUT(dOutEvIM,31,0);
+    VL_OUT(dOutEvRE,31,0);
+    VL_OUT(dOutOddIM,31,0);
+    VL_OUT(dOutOddRE,31,0);
+    IData/*16:0*/ SBM16__DOT__interRE1;
+    IData/*16:0*/ SBM16__DOT__interIM1;
+    IData/*31:0*/ SBM16__DOT__interOdd2MRE;
+    IData/*31:0*/ SBM16__DOT__interOdd2MIM;
+    IData/*16:0*/ SBM16__DOT__sumEvRE;
+    IData/*16:0*/ SBM16__DOT__sumEvIM;
+    IData/*16:0*/ SBM16__DOT__sumOddRE;
+    IData/*16:0*/ SBM16__DOT__sumOddIM;
     IData/*31:0*/ __VactIterCount;
     VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;
+    VlUnpacked<CData/*0:0*/, 2> __Vm_traceActivity;
 
     // INTERNAL VARIABLES
     VSBM16__Syms* vlSymsp;

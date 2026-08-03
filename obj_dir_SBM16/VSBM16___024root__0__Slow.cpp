@@ -43,7 +43,7 @@ VL_ATTR_COLD void VSBM16___024root___eval_settle(VSBM16___024root* vlSelf) {
 #ifdef VL_DEBUG
             VSBM16___024root___dump_triggers__stl(vlSelfRef.__VstlTriggered, "stl"s);
 #endif
-            VL_FATAL_MT("SBM16.sv", 1, "", "Settle region did not converge after 100 tries");
+            VL_FATAL_MT("SBM16.sv", 6, "", "Settle region did not converge after 100 tries");
         }
         __VstlIterCount = ((IData)(1U) + __VstlIterCount);
     } while (VSBM16___024root___eval_phase__stl(vlSelf));
@@ -96,6 +96,7 @@ VL_ATTR_COLD bool VSBM16___024root___trigger_anySet__stl(const VlUnpacked<QData/
 }
 
 void VSBM16___024root___ico_sequent__TOP__0(VSBM16___024root* vlSelf);
+VL_ATTR_COLD void VSBM16___024root____Vm_traceActivitySetAll(VSBM16___024root* vlSelf);
 
 VL_ATTR_COLD void VSBM16___024root___eval_stl(VSBM16___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    VSBM16___024root___eval_stl\n"); );
@@ -104,6 +105,7 @@ VL_ATTR_COLD void VSBM16___024root___eval_stl(VSBM16___024root* vlSelf) {
     // Body
     if ((1ULL & vlSelfRef.__VstlTriggered[0U])) {
         VSBM16___024root___ico_sequent__TOP__0(vlSelf);
+        VSBM16___024root____Vm_traceActivitySetAll(vlSelf);
     }
 }
 
@@ -152,6 +154,15 @@ VL_ATTR_COLD void VSBM16___024root___dump_triggers__act(const VlUnpacked<QData/*
 }
 #endif  // VL_DEBUG
 
+VL_ATTR_COLD void VSBM16___024root____Vm_traceActivitySetAll(VSBM16___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    VSBM16___024root____Vm_traceActivitySetAll\n"); );
+    VSBM16__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__Vm_traceActivity[0U] = 1U;
+    vlSelfRef.__Vm_traceActivity[1U] = 1U;
+}
+
 VL_ATTR_COLD void VSBM16___024root___ctor_var_reset(VSBM16___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    VSBM16___024root___ctor_var_reset\n"); );
     VSBM16__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
@@ -165,10 +176,18 @@ VL_ATTR_COLD void VSBM16___024root___ctor_var_reset(VSBM16___024root* vlSelf) {
     vlSelf->WInIM = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 615623189748249843ull);
     vlSelf->d2InRE = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 1465868360269702402ull);
     vlSelf->d2InIM = VL_SCOPED_RAND_RESET_I(16, __VscopeHash, 6021060780541280614ull);
-    vlSelf->dataOutIM = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 8582329364871988122ull);
-    vlSelf->dataOutRE = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 16008428910837689854ull);
-    vlSelf->SBM16__DOT__sumRE = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 12851734692319214019ull);
-    vlSelf->SBM16__DOT__sumIM = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 2205185768415461019ull);
+    vlSelf->dOutEvIM = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 11299572947881694118ull);
+    vlSelf->dOutEvRE = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 4468342010917289275ull);
+    vlSelf->dOutOddIM = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 15199451656235868983ull);
+    vlSelf->dOutOddRE = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 7024104079251665052ull);
+    vlSelf->SBM16__DOT__interRE1 = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 7288317691460110012ull);
+    vlSelf->SBM16__DOT__interIM1 = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 8739363600004740889ull);
+    vlSelf->SBM16__DOT__interOdd2MRE = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 8377991172990283902ull);
+    vlSelf->SBM16__DOT__interOdd2MIM = VL_SCOPED_RAND_RESET_I(32, __VscopeHash, 12387236509241810067ull);
+    vlSelf->SBM16__DOT__sumEvRE = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 6282973380927812639ull);
+    vlSelf->SBM16__DOT__sumEvIM = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 6017874228018654764ull);
+    vlSelf->SBM16__DOT__sumOddRE = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 11700164684608465456ull);
+    vlSelf->SBM16__DOT__sumOddIM = VL_SCOPED_RAND_RESET_I(17, __VscopeHash, 16810285503526244011ull);
     for (int __Vi0 = 0; __Vi0 < 1; ++__Vi0) {
         vlSelf->__VstlTriggered[__Vi0] = 0;
     }
@@ -181,5 +200,8 @@ VL_ATTR_COLD void VSBM16___024root___ctor_var_reset(VSBM16___024root* vlSelf) {
     vlSelf->__Vtrigprevexpr___TOP__clk__0 = 0;
     for (int __Vi0 = 0; __Vi0 < 1; ++__Vi0) {
         vlSelf->__VnbaTriggered[__Vi0] = 0;
+    }
+    for (int __Vi0 = 0; __Vi0 < 2; ++__Vi0) {
+        vlSelf->__Vm_traceActivity[__Vi0] = 0;
     }
 }

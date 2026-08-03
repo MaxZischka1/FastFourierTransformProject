@@ -1,8 +1,40 @@
+//PPU is working very nicely I don't like the test bench.
+//Next step is a clocked decoder between the rams and the 
 #include <stdlib.h>
+#include <iostream>
+#include <random>
+#include <deque>
 #include "VPPU.h"
 #include "verilatorTB.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
+
+/*
+-----Flow of the address generator so far---
+A layer between the BRAM and PPU for decoder will be needed most likely clocked to not create the crit path.
+
+IDLE UNTIL Start sign
+CYCLE 0: IDLE (Start Sig goes high)
+Cycle 1: next_state is read and write
+Cycle 2: State recognized. States: (writing to RAM2 and reading from RAM1) 
+waddr1 = 255
+waddr2 = 0
+ram1writeenable = 0;
+ram2writeenable = 1; (Active high)
+raddr1 = 0;
+raddr2 = 255
+readMemSel = 0 (read to ram 1 enabled)
+Cycle 3: 
+raddr1 starts indexing
+Cycle 5:
+waddr2 starts indexing
+Cycle 8: raddr1==6 next_state read2
+Cycle 9: raddr1 stops: state = read2
+Cycle 10: raddr2 = 0, raddr1 = 255
+Cycle 11: waddr2 stops, state is write 1
+Cycle 12: waddr2 = 255, waddr1 = 0
+
+*/
 
 int main(int argc, char** argv){
     VPPU *tb = new VPPU;
@@ -17,10 +49,13 @@ int main(int argc, char** argv){
         if(cycle==2) tb->startSigIN = 0;
         tick(tb,tfp);
         if(cycle>=2 && cycle<= 9){ //behavior is indexing from 0-7
-            int expects = cycle-2;
+            int cycleZero = cycle-2;
+            int expected = ((cycleZero & 1) << 2) | (cycleZero & 2) | ((cycleZero & 4) >> 2);
+
             check("writeEnable1", tb->weADDRen1, 1, cycle);
             check("changeVal", tb->change, 0, cycle);
-            check("InputBridgeAddress", tb->waddr1, expects, cycle);
+            check("InputBridgeAddress", tb->waddr1, expected, cycle);
+            
         }
         if(cycle>=10 && cycle<= 11){//10 Sig goes high, 11 state is READ1, 12 is incrementing
             check("Done", tb->change, 1, cycle);
@@ -28,12 +63,16 @@ int main(int argc, char** argv){
         }
         if(cycle>=12 && cycle <= 19){
             int expects = cycle-12;
-            check("readADDR2Buf", tb->raddr1, expects, cycle);
+            check("readADDR1Buf", tb->raddr1, expects, cycle);
         }
         if(cycle>=14&&cycle<=21){ //Pipelined twice
             int expects = cycle-14;
             check("write2Addr", tb->waddr2, expects, cycle);
             check("writeEnable2", tb->weADDRen2, 1, cycle);
+        }
+        if(cycle>=20 && cycle<=27){
+            int expects = cycle-20;
+            check("read2Addr", tb->raddr2, expects, cycle);
         }
     }
     //
