@@ -8,6 +8,7 @@ module PPU ( //current issue solving is getting address transition correct,
 //should go from 0 to 7 with other RAM staying at a consistant 0. May need an IF statement. Then start BFU construction
     input logic startSigIN,
     input logic clk,
+    output logic [7:0] EEPROMaddressOdd, EEPROMaddressEv,
     output logic [7:0] waddr1,
     output logic [7:0] waddr2,
     output logic [7:0] raddr1,
@@ -28,6 +29,11 @@ typedef enum logic [1:0]{ //This takes the input which I think I will save to so
 states_in statein, next_statein;
 
 logic doneIN;
+
+logic [7:0] EEPROMaddressOddBuf, EEPROMaddressEvBuf;
+assign EEPROMaddressOdd = {EEPROMaddressOddBuf[7:3], EEPROMaddressOddBuf[0],EEPROMaddressOddBuf[1],EEPROMaddressOddBuf[2]};
+assign EEPROMaddressEv = {EEPROMaddressEvBuf[7:3], EEPROMaddressEvBuf[0],EEPROMaddressEvBuf[1],EEPROMaddressEvBuf[2]};
+
 logic [7:0] addressIn;
 logic weInput;
 
@@ -40,11 +46,15 @@ always @(posedge clk) begin
     case(statein) 
         IDLEIN: begin
             doneIN <= 1'd0;
+            EEPROMaddressEvBuf <= 8'd254;
+            EEPROMaddressOddBuf <= 8'd255;
             addressIn <= 8'd255;
             weInput <= 1'd0; 
         end
         TRANSIN:begin
             weInput <= 1'd1; 
+            EEPROMaddressEvBuf <= EEPROMaddressEvBuf + 8'd2;
+            EEPROMaddressOddBuf <= EEPROMaddressOddBuf + 8'd2;
             addressIn <= addressIn + 1'd1;
             doneIN <= 1'd0;
         end
@@ -52,11 +62,15 @@ always @(posedge clk) begin
             weInput <= 1'd0; 
             doneIN <= 1'd1;
             addressIn <= 8'd255;
+            EEPROMaddressEvBuf <= 8'd254;
+            EEPROMaddressOddBuf <= 8'd255;
         end
         default: begin
             weInput <= 0; 
             doneIN <= 0;
             addressIn <= 8'd255;
+            EEPROMaddressEvBuf <= 8'd254;
+            EEPROMaddressOddBuf <= 8'd255;
         end
     endcase
 end
@@ -66,7 +80,7 @@ always_comb begin
             next_statein = states_in'(startSigIN?TRANSIN:IDLEIN);
         end
         TRANSIN:begin
-            next_statein = states_in'((addressIn==6)?DONEIN:TRANSIN);
+            next_statein = states_in'((addressIn==2)?DONEIN:TRANSIN);
         end
         DONEIN: begin
             next_statein = IDLEIN;
@@ -100,26 +114,28 @@ states_read stater, next_stater;
 
 logic writeComp, readComp; //switch statements for when counters reach specific number
 logic [7:0] waddr1Buf, waddr2Buf, raddr1Buf, raddr2Buf, 
-waddr1BufP1, waddr1BufP2, waddr2BufP1, waddr2BufP2; //buffers for the outputs just to manipulate
+waddr1BufP1, waddr1BufP2, waddr2BufP1, waddr2BufP2,
+waddr1BufP3, waddr1BufP4, waddr2BufP3, waddr2BufP4, waddr1BufP5, waddr2BufP5; //buffers for the outputs just to manipulate
 logic [1:0] iteratStep; //this is checking what iteration of FFT we are on.
 assign stageNum = iteratStep;
 //combinational transition logic
-assign readComp = (raddr1Buf==6||raddr2Buf==6);
-assign writeComp = (waddr1Buf==6||waddr2Buf==6);
+assign readComp = (raddr1Buf==2||raddr2Buf==2);
+assign writeComp = (waddr1Buf==2||waddr2Buf==2);
 //output buffers
 assign raddr1 = raddr1Buf;
 assign raddr2 = raddr2Buf;
-assign waddr1 = change?waddr1BufP2:{addressIn[7:3],addressIn[0],addressIn[1], addressIn[2]};
-assign waddr2 = waddr2BufP2;
+assign waddr1 = change?waddr1BufP5:addressIn;
+assign waddr2 = waddr2BufP5;
 //readmemSel
 logic readMemSelBuf, readMemSelBufP1;
 assign readMemSel = readMemSelBufP1; //start in read2
 
 logic weADDRen1Buf, weADDRen1BufP1, weADDRen1BufP2, 
-weADDRen2Buf, weADDRen2BufP1, weADDRen2BufP2;
+weADDRen2Buf, weADDRen2BufP1, weADDRen2BufP2, weADDRen1BufP3, weADDRen2BufP3, weADDRen1BufP4, 
+weADDRen2BufP4, weADDRen1BufP5, weADDRen2BufP5;
 
-assign weADDRen1 = change?weADDRen1BufP2:weInput;
-assign weADDRen2 = weADDRen2BufP2;
+assign weADDRen1 = change?weADDRen1BufP5:weInput;
+assign weADDRen2 = weADDRen2BufP5;
 
 always_comb begin //state trans block
     case(statew)
@@ -227,18 +243,34 @@ always_ff @(posedge clk) begin //startSignal
     if(readComp) begin
         iteratStep <= iteratStep + 1;
     end
-    //pipeline the last writing outputs
+    /*pipeline by 5 clock cycles
+     1 delay output the data from the RAM
+     1 to have data present before posedge of next clk
+     3 for BFU logic in between
+     */
     waddr1BufP1 <= waddr1Buf;
     waddr1BufP2 <= waddr1BufP1;
+    waddr1BufP3 <= waddr1BufP2;
+    waddr1BufP4 <= waddr1BufP3;
+    waddr1BufP5 <= waddr1BufP4;
 
     waddr2BufP1 <= waddr2Buf;
     waddr2BufP2 <= waddr2BufP1;
+    waddr2BufP3 <= waddr2BufP2;
+    waddr2BufP4 <= waddr2BufP3;
+    waddr2BufP5 <= waddr2BufP4;
 
     weADDRen1BufP1 <= weADDRen1Buf;
     weADDRen1BufP2 <= weADDRen1BufP1;
- 
+    weADDRen1BufP3 <= weADDRen1BufP2;
+    weADDRen1BufP4 <= weADDRen1BufP3;
+    weADDRen1BufP5 <= weADDRen1BufP4;
+
     weADDRen2BufP1 <= weADDRen2Buf;
     weADDRen2BufP2 <= weADDRen2BufP1;
+    weADDRen2BufP3 <= weADDRen2BufP2;
+    weADDRen2BufP4 <= weADDRen2BufP3;
+    weADDRen2BufP5 <= weADDRen2BufP4;
     //readMem at same clock cycle as RAM
     readMemSelBufP1 <= readMemSelBuf;
 end

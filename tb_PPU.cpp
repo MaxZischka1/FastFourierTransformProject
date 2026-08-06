@@ -1,5 +1,6 @@
-//PPU is working very nicely I don't like the test bench.
-//Next step is a clocked decoder between the rams and the 
+//We made the PPU wrong the logic of testbench eeprom is just wrong
+//Idea is to keep the counters that add by two and address that loads by 1
+//So just change the odd to also add by two. And have both reverse there signal
 #include <stdlib.h>
 #include <iostream>
 #include <random>
@@ -42,36 +43,46 @@ int main(int argc, char** argv){
     setup(tb, tfp, argc, argv, "waveform_PPU.vcd");
     tb->startSigIN = 0;
     tb->clk = 0;
+    int EEPROMEvOut = 0;
+    int EEPROMOddOut = 1;
 
     int max_cycle = 600;
     for(int cycle = 0; (cycle < max_cycle) && !Verilated::gotFinish(); cycle++){
         if(cycle==1) tb->startSigIN = 1;
         if(cycle==2) tb->startSigIN = 0;
+        
         tick(tb,tfp);
-        if(cycle>=2 && cycle<= 9){ //behavior is indexing from 0-7
+        if(cycle>=2 && cycle<= 5){ //behaviour, loads bits in bit reversed order
             int cycleZero = cycle-2;
-            int expected = ((cycleZero & 1) << 2) | (cycleZero & 2) | ((cycleZero & 4) >> 2);
+            int cycleZeroRevInt = cycleZero+1;
 
+            int revEv = (EEPROMEvOut&4)>>2 | (EEPROMEvOut&2) | (EEPROMEvOut&1)<<2;
+            int revOdd = (EEPROMOddOut&4)>>2 | (EEPROMOddOut&2) | (EEPROMOddOut&1)<<2;
+            
             check("writeEnable1", tb->weADDRen1, 1, cycle);
             check("changeVal", tb->change, 0, cycle);
-            check("InputBridgeAddress", tb->waddr1, expected, cycle);
+            check("InputBridgeAddressRAM", tb->waddr1, cycleZero, cycle);
+            check("InputBridgeAddressEEPROMEven", tb->EEPROMaddressEv, revEv, cycle);
+            check("InputBridgeAddressEEPROMOdd", tb->EEPROMaddressOdd, revOdd, cycle);
+            EEPROMEvOut = EEPROMEvOut+2;
+            EEPROMOddOut = EEPROMOddOut+2;
             
         }
-        if(cycle>=10 && cycle<= 11){//10 Sig goes high, 11 state is READ1, 12 is incrementing
+        if(cycle>=6 && cycle<= 7){//6 Sig goes high, 7 state is READ1, 8 is incrementing
             check("Done", tb->change, 1, cycle);
             check("readADDR2Buf", tb->weADDRen2, 0, cycle);
         }
-        if(cycle>=12 && cycle <= 19){
-            int expects = cycle-12;
+        if(cycle>=8 && cycle <= 15){
+            int expects = cycle-8;
             check("readADDR1Buf", tb->raddr1, expects, cycle);
         }
-        if(cycle>=14&&cycle<=21){ //Pipelined twice
-            int expects = cycle-14;
+        if(cycle>=13&&cycle<=20){ //Pipelined twice
+            int expects = cycle-13;
             check("write2Addr", tb->waddr2, expects, cycle);
             check("writeEnable2", tb->weADDRen2, 1, cycle);
         }
-        if(cycle>=20 && cycle<=27){
-            int expects = cycle-20;
+        if(cycle>=16 && cycle<=23){
+            int expects = cycle-16;
             check("read2Addr", tb->raddr2, expects, cycle);
         }
     }

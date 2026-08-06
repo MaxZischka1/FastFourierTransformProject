@@ -181,6 +181,8 @@ int main(int argc, char** argv){
         tx = SBMTxGen();
         drv->drive(tx);
         tick(tb,tfp);
+        tick(tb,tfp);
+        tick(tb,tfp);
         monIn->monitor();
         monOut->monitor();
         

@@ -16,7 +16,6 @@ class alignas(VL_CACHE_LINE_BYTES) VSBM16___024root final {
     // DESIGN SPECIFIC STATE
     VL_IN8(clk,0,0);
     CData/*0:0*/ __VstlFirstIteration;
-    CData/*0:0*/ __VicoFirstIteration;
     CData/*0:0*/ __Vtrigprevexpr___TOP__clk__0;
     VL_IN16(d1InRE,15,0);
     VL_IN16(d1InIM,15,0);
@@ -32,13 +31,16 @@ class alignas(VL_CACHE_LINE_BYTES) VSBM16___024root final {
     IData/*16:0*/ SBM16__DOT__interIM1;
     IData/*31:0*/ SBM16__DOT__interOdd2MRE;
     IData/*31:0*/ SBM16__DOT__interOdd2MIM;
+    IData/*31:0*/ SBM16__DOT__interOdd3MRE;
+    IData/*31:0*/ SBM16__DOT__interOdd3MIM;
     IData/*16:0*/ SBM16__DOT__sumEvRE;
     IData/*16:0*/ SBM16__DOT__sumEvIM;
     IData/*16:0*/ SBM16__DOT__sumOddRE;
     IData/*16:0*/ SBM16__DOT__sumOddIM;
+    IData/*16:0*/ SBM16__DOT__sumEvREP;
+    IData/*16:0*/ SBM16__DOT__sumEvIMP;
     IData/*31:0*/ __VactIterCount;
     VlUnpacked<QData/*63:0*/, 1> __VstlTriggered;
-    VlUnpacked<QData/*63:0*/, 1> __VicoTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VactTriggered;
     VlUnpacked<QData/*63:0*/, 1> __VnbaTriggered;
     VlUnpacked<CData/*0:0*/, 2> __Vm_traceActivity;

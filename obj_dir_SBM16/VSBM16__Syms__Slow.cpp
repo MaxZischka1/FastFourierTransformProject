@@ -11,7 +11,7 @@ VSBM16__Syms::VSBM16__Syms(VerilatedContext* contextp, const char* namep, VSBM16
     , TOP{this, namep}
 {
     // Check resources
-    Verilated::stackCheck(250);
+    Verilated::stackCheck(188);
     // Setup sub module instances
     // Configure time unit / time precision
     _vm_contextp__->timeunit(-12);

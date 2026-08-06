@@ -8,6 +8,7 @@ obj_dir_SBM16/
 .stamp.verilate_bram
 .stamp.verilate_PPU
 .stamp.verilate_BFU
+.stamp.verilate_SBM16
 
 
 # Waveform files

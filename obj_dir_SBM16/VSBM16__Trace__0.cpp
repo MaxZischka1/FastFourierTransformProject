@@ -27,20 +27,24 @@ void VSBM16___024root__trace_chg_0_sub_0(VSBM16___024root* vlSelf, VerilatedVcd:
         bufp->chgIData(oldp+1,(vlSelfRef.SBM16__DOT__interIM1),17);
         bufp->chgIData(oldp+2,(vlSelfRef.SBM16__DOT__interOdd2MRE),32);
         bufp->chgIData(oldp+3,(vlSelfRef.SBM16__DOT__interOdd2MIM),32);
-        bufp->chgIData(oldp+4,(vlSelfRef.SBM16__DOT__sumEvRE),17);
-        bufp->chgIData(oldp+5,(vlSelfRef.SBM16__DOT__sumEvIM),17);
+        bufp->chgIData(oldp+4,(vlSelfRef.SBM16__DOT__interOdd3MRE),32);
+        bufp->chgIData(oldp+5,(vlSelfRef.SBM16__DOT__interOdd3MIM),32);
+        bufp->chgIData(oldp+6,(vlSelfRef.SBM16__DOT__sumEvRE),17);
+        bufp->chgIData(oldp+7,(vlSelfRef.SBM16__DOT__sumEvIM),17);
+        bufp->chgIData(oldp+8,(vlSelfRef.SBM16__DOT__sumEvREP),17);
+        bufp->chgIData(oldp+9,(vlSelfRef.SBM16__DOT__sumEvIMP),17);
     }
-    bufp->chgBit(oldp+6,(vlSelfRef.clk));
-    bufp->chgSData(oldp+7,(vlSelfRef.d1InRE),16);
-    bufp->chgSData(oldp+8,(vlSelfRef.d1InIM),16);
-    bufp->chgSData(oldp+9,(vlSelfRef.WInRE),16);
-    bufp->chgSData(oldp+10,(vlSelfRef.WInIM),16);
-    bufp->chgSData(oldp+11,(vlSelfRef.d2InRE),16);
-    bufp->chgSData(oldp+12,(vlSelfRef.d2InIM),16);
-    bufp->chgIData(oldp+13,(vlSelfRef.dOutEvIM),32);
-    bufp->chgIData(oldp+14,(vlSelfRef.dOutEvRE),32);
-    bufp->chgIData(oldp+15,(vlSelfRef.dOutOddIM),32);
-    bufp->chgIData(oldp+16,(vlSelfRef.dOutOddRE),32);
+    bufp->chgBit(oldp+10,(vlSelfRef.clk));
+    bufp->chgSData(oldp+11,(vlSelfRef.d1InRE),16);
+    bufp->chgSData(oldp+12,(vlSelfRef.d1InIM),16);
+    bufp->chgSData(oldp+13,(vlSelfRef.WInRE),16);
+    bufp->chgSData(oldp+14,(vlSelfRef.WInIM),16);
+    bufp->chgSData(oldp+15,(vlSelfRef.d2InRE),16);
+    bufp->chgSData(oldp+16,(vlSelfRef.d2InIM),16);
+    bufp->chgIData(oldp+17,(vlSelfRef.dOutEvIM),32);
+    bufp->chgIData(oldp+18,(vlSelfRef.dOutEvRE),32);
+    bufp->chgIData(oldp+19,(vlSelfRef.dOutOddIM),32);
+    bufp->chgIData(oldp+20,(vlSelfRef.dOutOddRE),32);
 }
 
 void VSBM16___024root__trace_cleanup(void* voidSelf, VerilatedVcd* /*unused*/) {
