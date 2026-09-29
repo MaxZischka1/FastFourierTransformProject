@@ -1,0 +1,1 @@
+//Computes magnitude of FFT and compresses output to 8 bits.

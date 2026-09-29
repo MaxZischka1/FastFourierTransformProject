@@ -1,0 +1,20 @@
+# Verilator output
+obj_dir*/
+
+
+.stamp.verilate
+.stamp.verilate_bram
+.stamp.verilate_PPU
+.stamp.verilate_BFU
+.stamp.verilate_SBM16
+.stamp.verilate_SDFCell
+
+
+# Waveform files
+*.vcd
+*.ghw
+*.fst
+
+# Trace files
+*.dat
+*.log
