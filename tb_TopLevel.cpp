@@ -85,7 +85,7 @@ class TLScb{
             int dataMultOutREInt, dataMultOutIMInt;
             int16_t dataMultOutRE, dataMultOutIM;
             int index;
-            for(int i = 16; i >= 2; i /= 2){
+            for(int i = 16; i >= 2; i /= 2){ //make this not hard stuck
                 int half = i/2;
                 for(int k = 0; k < 16; k += i){
                     for(int j = 0; j<half; j++){
