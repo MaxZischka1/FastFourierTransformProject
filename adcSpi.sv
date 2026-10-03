@@ -11,6 +11,7 @@ module adcSpi(
     output logic [11:0] dataOut
 );
 
+
 typedef enum logic [2:0] { 
     Idle,
     Start,
@@ -80,6 +81,12 @@ always_ff @(posedge clk) begin
             validO <= 1'd1;
             scss <= 1'd1;
         end
+        default: begin
+             fullCounter <= 0;
+            validO <= 0;
+            sclk <= 0;
+            scss <= 1'd1;
+        end
         endcase
     end
 end
@@ -103,6 +110,7 @@ always_comb begin
                 if(dataIn == 0) next_state = Shift;
                 else next_state = Idle;
             end
+            else next_state = Null;
         end
         Shift: begin
             if(changeCount && fullCounter == 15) next_state = Finish;
@@ -111,10 +119,6 @@ always_comb begin
         Finish: begin
             next_state = Idle;
         end
-
-
-
-
         default: next_state = Idle;
     endcase
 end

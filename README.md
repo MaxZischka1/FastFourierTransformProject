@@ -1,4 +1,2 @@
-Early stages of a Radix-2 FFT IP block implemented on an ice40up5k. Will later be compared to a more parallel implementation on a MAX10 FPGA.
-
-This is a double buffering implementation one of the simpliest only improving latency by 
-improving time by not waiting for all Butterfly operations to be complete before saving to memory of O(Nlog(N)). Want to implement a single path delay feedback architechture later.
+Synthesized on an ICE40UP5K using yosys and nextpnr. Pretty simple to make the project you can look (here)[Makefile].
+This build is for a 4 stage FFT but this can obviously be built up to N with a few tweaks. The 4-stage build runs at 44.23 MHz before I tried rewriting the SPI interface so those times are tbd. The # of logic cells is 1,533 and all 8 DSP blocks are used.

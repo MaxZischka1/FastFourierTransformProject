@@ -1,5 +1,5 @@
 MODULE=TopLevel
-SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv 
+SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv  adcSpi.sv
 ICE40_CELLS = /opt/homebrew/share/yosys/ice40/cells_sim.v
 # UNDRIVEN: allow module outputs/signals that are not driven yet
 WARN_FLAGS = -Wall -Wno-UNDRIVEN -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-EOFNEWLINE
@@ -97,6 +97,27 @@ waveform_SDFCell.vcd: ./obj_dir_SDFCell/VSDFCell
 .stamp.verilate_SDFCell: $(SRCS) tb_SDFCell.cpp
 	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) --top-module SDFCell --exe tb_SDFCell.cpp verilatorTB.cpp --Mdir obj_dir_SDFCell -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_SDFCell
+
+waves_adcSpi: waveform_spi.vcd
+	@echo
+	@echo "## WAVES ##"
+	gtkwave waveform_spi.vcd
+
+sim_adcSpi: waveform_spi.vcd
+
+waveform_spi.vcd: ./obj_dir_adcSpi/VadcSpi
+	@./obj_dir_adcSpi/VadcSpi
+
+./obj_dir_adcSpi/VadcSpi: .stamp.verilate_adcSpi
+	@make -C obj_dir_adcSpi -f VadcSpi.mk VadcSpi
+
+.stamp.verilate_adcSpi: $(SRCS) tb_adcSpi.cpp
+	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) --top-module adcSpi --exe tb_adcSpi.cpp verilatorTB.cpp --Mdir obj_dir_adcSpi -CFLAGS "-DVERILATOR -std=c++17"
+	@touch .stamp.verilate_adcSpi
+
+
+
+
 
 # ---------------- Synthesis / place & route / reports ----------------
 # DEVICE/PACKAGE pick the iCE40 part, FREQ is the clock target nextpnr reports against.
