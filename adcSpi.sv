@@ -13,15 +13,15 @@ module adcSpi(
 
 
 typedef enum logic [2:0] { 
-    Idle,
-    Start,
+    Idle, //waiting for startTrans
+    Start,//
     Wait,
     Null,
     Shift,
     Finish
 } states;
 states state, next_state;
-logic [3:0] fullCounter;
+logic [4:0] fullCounter;
 logic [5:0] internalCounter;
 logic changeCount; //indicates change of count
 
@@ -35,12 +35,13 @@ always_ff @(posedge clk) begin
         state <= Idle;
         validO <= 0;
         sclk <= 0;
+        changeCount <= '0;
         scss <= 1'd1;
     end
     else begin
         state <= next_state;
             if(internalCounter == internalCount - 1) begin
-                    sclk <= ~sclk;
+                    sclk <= '0;
                     internalCounter <= 0;
                     changeCount <= 1'd0;
                     fullCounter <= fullCounter + 1;
@@ -49,7 +50,7 @@ always_ff @(posedge clk) begin
             changeCount <= 1'd0;
             internalCounter <= internalCounter + 1;
             if(internalCounter == internalCount/2 -1) begin
-                 sclk <= ~sclk;
+                 sclk <= 1'b1;
                  changeCount <= 1'd1;
             end
             end 
@@ -92,7 +93,7 @@ always_ff @(posedge clk) begin
 end
 
 always_comb begin
-    case(state)
+    case(state) //all state transistion logic
         Idle: begin
             if(startTrans == 1'd1 && changeCount) next_state = Start;
             else next_state = Idle;
@@ -106,14 +107,11 @@ always_comb begin
             else next_state = Wait;
         end
         Null: begin
-            if(fullCounter==4) begin
-                if(dataIn == 0) next_state = Shift;
-                else next_state = Idle;
-            end
+            if(fullCounter == 4 && changeCount) next_state = (dataIn == 0)? Shift : Idle;
             else next_state = Null;
         end
         Shift: begin
-            if(changeCount && fullCounter == 15) next_state = Finish;
+            if(changeCount && fullCounter == 16) next_state = Finish;
             else next_state = Shift;
         end
         Finish: begin

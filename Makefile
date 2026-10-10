@@ -1,5 +1,6 @@
 MODULE=TopLevel
-SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv  adcSpi.sv
+SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv  
+ADCSPI_SRCS = adcSpi.sv
 ICE40_CELLS = /opt/homebrew/share/yosys/ice40/cells_sim.v
 # UNDRIVEN: allow module outputs/signals that are not driven yet
 WARN_FLAGS = -Wall -Wno-UNDRIVEN -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-EOFNEWLINE
@@ -37,12 +38,18 @@ waveform_TopLevel.vcd: ./obj_dir_TopLevel/VTopLevel
 lint: $(SRCS)
 	verilator --lint-only -Wall -Wno-EOFNEWLINE -sv $(SRCS) --top-module TopLevel
 
+.PHONY: lint_adcSpi
+lint_adcSpi: $(ADCSPI_SRCS)
+	verilator --lint-only -Wall -Wno-EOFNEWLINE -Wno-DECLFILENAME -sv $(ADCSPI_SRCS) --top-module adcSpi
+
 .PHONY: clean
 clean:
 	rm -rf .stamp.*;
 	rm -rf ./obj_dir_TL
 	rm -rf ./obj_dir_bram
 	rm -rf waveform_TopLevel.vcd
+	rm -rf ./obj_dir_adcSpi
+	rm -rf waveform_spi.vcd
 	rm -rf waveform_bram.vcd
 	rm -f top.json top.asc synth.log pnr.log pnr.json report.json
 
@@ -111,8 +118,8 @@ waveform_spi.vcd: ./obj_dir_adcSpi/VadcSpi
 ./obj_dir_adcSpi/VadcSpi: .stamp.verilate_adcSpi
 	@make -C obj_dir_adcSpi -f VadcSpi.mk VadcSpi
 
-.stamp.verilate_adcSpi: $(SRCS) tb_adcSpi.cpp
-	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) --top-module adcSpi --exe tb_adcSpi.cpp verilatorTB.cpp --Mdir obj_dir_adcSpi -CFLAGS "-DVERILATOR -std=c++17"
+.stamp.verilate_adcSpi: adcSpi.sv tb_adcSpi.cpp
+	verilator $(WARN_FLAGS) -Wno-UNUSED -Wno-DECLFILENAME --trace -cc adcSpi.sv --top-module adcSpi --exe tb_adcSpi.cpp verilatorTB.cpp --Mdir obj_dir_adcSpi -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_adcSpi
 
 

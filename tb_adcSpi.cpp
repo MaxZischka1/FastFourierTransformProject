@@ -10,18 +10,25 @@
 
 bool tb_called = false;
 
-
-
-
-std::vector<int> dataIn = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, //each represents a half cycle of sclk
-                           0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,1,1,0,0,0,
-                           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-std::vector<int> resetN = {0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                           1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                           1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-std::vector<int> startTrans = {0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                               1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
-                               0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int sclkPeriod = 48;
+std::vector<int> dataIn     = {0,0,0,0,0,0,
+                                1,1,1,1,1,1,1,0,1,1,0,1, 
+                                0,0,
+                                0,0,0,0,0,0,
+                                1,1,0,1,1,1,1,0,1,1,1,1, 
+                                0,0};
+std::vector<int> resetN     = {0,1,1,1,1,1,
+                                1,1,1,1,1,1,1,1,1,1,1,1,
+                                 1,1,
+                                0,1,1,1,1,1,
+                                1,1,1,1,1,1,1,1,1,1,1,1,
+                                 1,1};
+std::vector<int> startTrans = {0,1,0,0,0,0,
+                                0,0,0,0,0,0,0,0,0,0,0,0,
+                                0,0,
+                                0,1,0,0,0,0,
+                                0,0,0,0,0,0,0,0,0,0,0,0,
+                                0,0};
 
 int main_cycles = dataIn.size();
 
@@ -34,17 +41,19 @@ class ADCTxOut{
     public:
         int16_t dataOut;
         bool scss, validO;
-        
+
 };
 
 std::deque<ADCTxIn*> genTx(){
     std::deque<ADCTxIn*> ins;
     for(int i = 0; i < main_cycles; i++){
-        ADCTxIn *tx = new ADCTxIn();
-        tx->dataIn = dataIn[i];
-        tx->resetN = resetN[i];
-        tx->startTrans = startTrans[i];
-        ins.push_back(tx);
+        for(int j = 0; j < sclkPeriod; j++){
+            ADCTxIn *tx = new ADCTxIn();
+            tx->dataIn = resetN[i] ? dataIn[i] : 0;
+            tx->resetN = resetN[i];
+            tx->startTrans = startTrans[i];
+            ins.push_back(tx);
+        }
     }
     return ins;
 };
@@ -61,6 +70,7 @@ class ADCDrive{
             dut->startTrans = tx->startTrans;
             dut->dataIn = tx->dataIn;
             dut->resetN = tx->resetN;
+            delete tx;
         }
 };
 
@@ -69,8 +79,8 @@ class ADCScb{
          std::deque<ADCTxIn*> in_q;
     public:
 
-        int16_t sol = 0x0FED;
-        
+        int16_t sol[2] = {0x0FED, 0x0DEF};
+        int out_count = 0;
 
         void writeIn(ADCTxIn *tx){
             in_q.push_back(tx);
@@ -85,15 +95,18 @@ class ADCScb{
             in = in_q.front();
             in_q.pop_front();
 
-            if(tx->dataOut != sol){
+            if(tx->dataOut != sol[out_count]){
                 std::cout << "FAILED" << std::endl;
-                std::cout << "DUT Output:   " << tx->dataOut << std::endl;
-                std::cout << "Testbench Sol:   " << sol << std::endl;
+                std::cout << "DUT Output:   " << std::hex << tx->dataOut << std::dec << std::endl;
+                std::cout << "Testbench Sol:   " << std::hex << sol[out_count] << std::dec << std::endl;
                 error_count++;
             }else{
                 std::cout << "SUCCESS"<< std::endl;
-                std::cout << "output:  " << tx->dataOut << std::endl;
+                std::cout << "output:  " << std::hex << tx->dataOut << std::dec << std::endl;
             }
+            out_count++;
+            delete in;
+            delete tx;
         }
 
 };
@@ -144,16 +157,19 @@ class ADCmonOut{
 int main(int argc, char** argv){
     VadcSpi *tb = new VadcSpi;
     VerilatedVcdC *tfp = new VerilatedVcdC;
-     setup(tb, tfp, argc, argv, "waveform_spi.vcd");
+    setup(tb, tfp, argc, argv, "waveform_spi.vcd");
+    if(main_cycles != (int)resetN.size() || main_cycles != (int)startTrans.size())
+        std::cout << "inputs don't match time *ERROR*" << std::endl;
     ADCTxIn *tx;
     std::deque<ADCTxIn*> in = genTx();
+    int total_ticks = in.size();
     ADCDrive *drv = new ADCDrive(tb);
     ADCScb *scb = new ADCScb();
 
     ADCmonIn *monIn = new ADCmonIn(tb, scb);
     ADCmonOut *monOut = new ADCmonOut(tb, scb);
 
-     for(int i = 0; i < main_cycles; i++){
+     for(int i = 0; i < total_ticks; i++){
         if(in.empty()){ std::cout << "Error inputs Empty" << std::endl; exit(1);}
         tx = in.front();
         in.pop_front();
@@ -162,6 +178,7 @@ int main(int argc, char** argv){
         monIn->monitor();
         monOut->monitor();
     }
+    if(!tb_called) std::cout << "validO never asserted *ERROR*" << std::endl;
     delete monIn;
     delete monOut;
     delete scb;

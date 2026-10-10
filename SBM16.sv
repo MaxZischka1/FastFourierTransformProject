@@ -33,22 +33,21 @@ end
     assign WInRE = twiddleRE[counter];
     assign WInIM = twiddleIM[counter];
 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk) begin //read greg sitts article new reset logic format.
         if(!reset) begin
-            interOdd3MRE <= 32'd0;
-            interOdd3MIM <= 32'd0;
-
-            interOdd2MRE <= 32'd0;
-            interOdd2MIM <= 32'd0;
             validOpipe <= 2'd0;
-
             counter <= '0;
-        end else begin
-        
-        if(en) begin
-        
-        validOpipe <= {validOpipe[0], valid};
-        //pipeline Regs for inputs
+        end
+        else begin
+            if(en) begin
+                validOpipe <= {validOpipe[0], valid};
+                if(valid) counter <= counter + (logN-1)'(stride); //always just wraps
+        end
+        end
+    end
+
+    always_ff @(posedge clk) begin
+            
         interOddIM1p <= interOddIM1;
         WInIMp <= WInIM;
         WInREp <= WInRE;
@@ -60,12 +59,7 @@ end
         interOdd3MRE <= interOdd2MRE - interOddIM1p*WInIMp;
         interOdd3MIM <= interOdd2MIM + interOddIM1p*WInREp;
 
-        if(valid) counter <= counter + (logN-1)'(stride); //always just wraps
-
-    
-        end
-
-        end
+        
     end
         assign dOutOddRE = interOdd3MRE[30:15];
         assign dOutOddIM = interOdd3MIM[30:15];
