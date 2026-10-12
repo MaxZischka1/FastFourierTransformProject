@@ -2,13 +2,13 @@
 obj_dir*/
 
 
-.stamp.verilate
+.stamp.verilate_*
 .stamp.verilate_bram
 .stamp.verilate_PPU
 .stamp.verilate_BFU
 .stamp.verilate_SBM16
 .stamp.verilate_SDFCell
-
+*.hex
 
 # Waveform files
 *.vcd

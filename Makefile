@@ -1,6 +1,5 @@
 MODULE=TopLevel
 SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv  
-ADCSPI_SRCS = adcSpi.sv
 ICE40_CELLS = /opt/homebrew/share/yosys/ice40/cells_sim.v
 # UNDRIVEN: allow module outputs/signals that are not driven yet
 WARN_FLAGS = -Wall -Wno-UNDRIVEN -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-EOFNEWLINE
@@ -50,6 +49,9 @@ clean:
 	rm -rf waveform_TopLevel.vcd
 	rm -rf ./obj_dir_adcSpi
 	rm -rf waveform_spi.vcd
+	rm -rf ./obj_dir_magToBin
+	rm -rf waveform_magToBin.vcd
+	rm -f fftOutRE.hex fftOutIM.hex
 	rm -rf waveform_bram.vcd
 	rm -f top.json top.asc synth.log pnr.log pnr.json report.json
 
@@ -104,6 +106,27 @@ waveform_SDFCell.vcd: ./obj_dir_SDFCell/VSDFCell
 .stamp.verilate_SDFCell: $(SRCS) tb_SDFCell.cpp
 	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) --top-module SDFCell --exe tb_SDFCell.cpp verilatorTB.cpp --Mdir obj_dir_SDFCell -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_SDFCell
+
+waves_magToBin: waveform_magToBin.vcd
+	@echo
+	@echo "## WAVES ##"
+	gtkwave waveform_magToBin.vcd
+
+sim_magToBin: waveform_magToBin.vcd
+
+waveform_magToBin.vcd: ./obj_dir_magToBin/VmagToBin fftOutRE.hex fftOutIM.hex
+	@./obj_dir_magToBin/VmagToBin
+
+./obj_dir_magToBin/VmagToBin: .stamp.verilate_magToBin
+	@make -C obj_dir_magToBin -f VmagToBin.mk VmagToBin
+
+.stamp.verilate_magToBin: magToBin.sv tb_magToBin.cpp
+	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc magToBin.sv --top-module magToBin --exe tb_magToBin.cpp verilatorTB.cpp --Mdir obj_dir_magToBin -CFLAGS "-DVERILATOR -std=c++17"
+	@touch .stamp.verilate_magToBin
+
+.PHONY: lint_magToBin
+lint_magToBin: magToBin.sv
+	verilator --lint-only -Wall -Wno-EOFNEWLINE -sv magToBin.sv --top-module magToBin
 
 waves_adcSpi: waveform_spi.vcd
 	@echo

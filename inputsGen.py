@@ -3,7 +3,7 @@ import argparse
 import numpy as np
 
 # Q1.15: scale by 2^15, saturate (+1.0 isn't representable), two's complement
-q15 = lambda x: np.clip(np.round(x * 32768), -32768, 32767).astype(int) & 0xFFFF
+q15 = lambda x: np.clip(np.round(x * 32767), -32767, 32767).astype(int) & 0xFFFF
 
 p = argparse.ArgumentParser(description="Generate Q1.15 hex samples of sin/cos for the FFT testbench")
 p.add_argument("sinFreq", type=float, help="sine frequency in Hz (real part)")
