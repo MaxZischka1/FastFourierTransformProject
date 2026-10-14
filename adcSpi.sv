@@ -22,7 +22,7 @@ typedef enum logic [2:0] {
 } states;
 states state, next_state;
 logic [4:0] fullCounter;
-localparam internalCount = 279; //38000000/17/8000, 8 kSPS for 500 Hz bins
+localparam internalCount = 176; //24000000/17/8000, 8 kSPS for 500 Hz bins
 logic [$clog2(internalCount)-1:0] internalCounter;
 logic changeCount; //indicates change of count
 

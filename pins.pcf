@@ -1,0 +1,24 @@
+set_io resetN 2
+set_io startTrans 3
+
+set_io adcData 4
+set_io adcCs 6
+set_io adcSclk 9
+
+set_io colOut[0] 10
+set_io colOut[1] 11
+set_io colOut[2] 12
+set_io colOut[3] 13
+set_io colOut[4] 18
+set_io colOut[5] 19
+set_io colOut[6] 20
+set_io colOut[7] 21
+
+set_io rowOut[0] 23
+set_io rowOut[1] 25
+set_io rowOut[2] 26
+set_io rowOut[3] 27
+set_io rowOut[4] 28
+set_io rowOut[5] 31
+set_io rowOut[6] 32
+set_io rowOut[7] 34

@@ -14,6 +14,7 @@ logic [7:0] ppRam [32]; //This is ping pong RAM always
 logic [7:0] bufferOut;
 logic toggleRW;
 
+
 logic [3:0] writeCounter, readCounter, readCounterD;
 
 logic [divCountWidth-1 : 0] divCounter;

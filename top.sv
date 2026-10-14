@@ -1,5 +1,7 @@
-module top #(parameter readDivCount = 16384)(
+module top #(parameter readDivCount = 8192)(
+`ifdef VERILATOR
     input logic clk,
+`endif
     input logic resetN,
     input logic startTrans,
     input logic adcData,
@@ -8,6 +10,11 @@ module top #(parameter readDivCount = 16384)(
     output logic [7:0] colOut,
     output logic [7:0] rowOut
 );
+
+`ifndef VERILATOR
+logic clk;
+SB_HFOSC #(.CLKHF_DIV("0b01")) osc(.CLKHFEN(1'b1), .CLKHFPU(1'b1), .CLKHF(clk));
+`endif
 
 logic [11:0] sample;
 logic sampleValid;

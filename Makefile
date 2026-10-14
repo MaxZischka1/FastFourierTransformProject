@@ -1,11 +1,8 @@
 MODULE=TopLevel
 SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv  
 TOP_SRCS = top.sv adcSpi.sv fifo.sv magToBin.sv ledDriver.sv $(SRCS)
-ICE40_CELLS = /opt/homebrew/share/yosys/ice40/cells_sim.v
 # UNDRIVEN: allow module outputs/signals that are not driven yet
 WARN_FLAGS = -Wall -Wno-UNDRIVEN -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-EOFNEWLINE
-
-	
 
 .PHONY:lint
 lint: $(SRCS)
@@ -159,20 +156,6 @@ waveform_top.vcd: ./obj_dir_top/Vtop
 	verilator $(WARN_FLAGS) -Wno-UNUSED -Wno-DECLFILENAME --trace -cc adcSpi.sv --top-module adcSpi --exe tb_adcSpi.cpp verilatorTB.cpp --Mdir obj_dir_adcSpi -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_adcSpi
 
-
-
-
-
-# ---------------- Synthesis / place & route / reports ----------------
-# DEVICE/PACKAGE pick the iCE40 part, FREQ is the clock target nextpnr reports against.
-# Set PCF=pins.pcf once pin constraints exist; until then IO is left unconstrained.
-DEVICE  = up5k
-PACKAGE = sg48
-FREQ    = 24
-PCF     =
-PCF_ARG = $(if $(PCF),--pcf $(PCF),--pcf-allow-unconstrained)
-
-
 yosys_sta:
 	yosys -p "read_verilog -sv $(TOP_SRCS); synth_ice40 -top top -abc9 -device u; sta"
 yosys_synthesize: top.json
@@ -180,21 +163,9 @@ yosys_synthesize: top.json
 top.json: $(TOP_SRCS)
 	yosys -l synth.log -p "read_verilog -sv $(TOP_SRCS); synth_ice40 -top top -json top.json"
 
-nextpnr: top.asc
-
-top.asc: top.json
-	nextpnr-ice40 --$(DEVICE) --package $(PACKAGE) --json top.json --asc top.asc \
-		--freq $(FREQ) $(PCF_ARG) --report report.json -l pnr.log
+next_pnrRep: 
+	nextpnr-ice40 --up5k --package sg48 --json top.json --pcf pins.pcf --asc top.asc --freq 24 --report timing.json
 
 .PHONY: lint_top
 lint_top: $(TOP_SRCS)
 	verilator --lint-only $(WARN_FLAGS) -Wno-DECLFILENAME -Wno-CASEINCOMPLETE -sv $(TOP_SRCS) --top-module top
-
-.PHONY: report_top
-report_top: top.asc
-	@echo
-	@echo "## UTILISATION ##"
-	@grep -A16 "Device utilisation" pnr.log
-	@echo
-	@echo "## TIMING ##"
-	@grep "Max frequency" pnr.log | tail -2

@@ -8,7 +8,7 @@
 
 bool tb_called = false;
 
-int sclkPeriod = 279;
+int sclkPeriod = 176;
 int readDivCount = 64;
 int frameCycles = 16*readDivCount;
 

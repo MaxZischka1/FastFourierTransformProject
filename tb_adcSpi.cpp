@@ -10,7 +10,7 @@
 
 bool tb_called = false;
 
-int sclkPeriod = 279;
+int sclkPeriod = 176;
 std::vector<int> dataIn     = {0,0,0,0,0,0,
                                 1,1,1,1,1,1,1,0,1,1,0,1, 
                                 0,0,
