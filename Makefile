@@ -51,6 +51,8 @@ clean:
 	rm -rf waveform_spi.vcd
 	rm -rf ./obj_dir_magToBin
 	rm -rf waveform_magToBin.vcd
+	rm -rf ./obj_dir_LEDDr
+	rm -rf waveform_LEDDr.vcd
 	rm -f fftOutRE.hex fftOutIM.hex
 	rm -rf waveform_bram.vcd
 	rm -f top.json top.asc synth.log pnr.log pnr.json report.json
@@ -127,6 +129,27 @@ waveform_magToBin.vcd: ./obj_dir_magToBin/VmagToBin fftOutRE.hex fftOutIM.hex
 .PHONY: lint_magToBin
 lint_magToBin: magToBin.sv
 	verilator --lint-only -Wall -Wno-EOFNEWLINE -sv magToBin.sv --top-module magToBin
+
+waves_LEDDr: waveform_LEDDr.vcd
+	@echo
+	@echo "## WAVES ##"
+	gtkwave waveform_LEDDr.vcd
+
+sim_LEDDr: waveform_LEDDr.vcd
+
+waveform_LEDDr.vcd: ./obj_dir_LEDDr/VledDriver
+	@./obj_dir_LEDDr/VledDriver
+
+./obj_dir_LEDDr/VledDriver: .stamp.verilate_LEDDr
+	@make -C obj_dir_LEDDr -f VledDriver.mk VledDriver
+
+.stamp.verilate_LEDDr: ledDriver.sv tb_ledDriver.cpp
+	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc ledDriver.sv -GreadDivCount=8 --top-module ledDriver --exe tb_ledDriver.cpp verilatorTB.cpp --Mdir obj_dir_LEDDr -CFLAGS "-DVERILATOR -std=c++17"
+	@touch .stamp.verilate_LEDDr
+
+.PHONY: lint_LEDDr
+lint_LEDDr: ledDriver.sv
+	verilator --lint-only -Wall -Wno-EOFNEWLINE -sv ledDriver.sv --top-module ledDriver
 
 waves_adcSpi: waveform_spi.vcd
 	@echo
