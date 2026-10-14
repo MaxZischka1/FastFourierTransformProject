@@ -1,36 +1,10 @@
 MODULE=TopLevel
 SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv  
+TOP_SRCS = top.sv adcSpi.sv fifo.sv magToBin.sv ledDriver.sv $(SRCS)
 ICE40_CELLS = /opt/homebrew/share/yosys/ice40/cells_sim.v
 # UNDRIVEN: allow module outputs/signals that are not driven yet
 WARN_FLAGS = -Wall -Wno-UNDRIVEN -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-EOFNEWLINE
 
-
-.PHONY:sim
-sim: waveform_TopLevel.vcd
-
-.PHONY: verilate
-verilate: .stamp.verilate
-
-.PHONY: build
-build: obj_dir_TopLevel/VTopLevel
-
-.PHONY: waves
-waves_TopLevel: waveform_TopLevel.vcd
-	@echo
-	@echo "## WAVES ##"
-	gtkwave waveform_TopLevel.vcd
-
-sim_TopLevel: waveform_TopLevel.vcd
-
-waveform_TopLevel.vcd: ./obj_dir_TopLevel/VTopLevel
-	@./obj_dir_TopLevel/VTopLevel
-
-./obj_dir_TopLevel/VTopLevel: .stamp.verilate_TopLevel
-	@make -C obj_dir_TopLevel -f VTopLevel.mk VTopLevel
-
-.stamp.verilate_TopLevel: $(SRCS) tb_TopLevel.cpp
-	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) --top-module TopLevel --exe tb_TopLevel.cpp verilatorTB.cpp --Mdir obj_dir_TopLevel -CFLAGS "-DVERILATOR -std=c++17"
-	@touch .stamp.verilate_TopLevel
 	
 
 .PHONY:lint
@@ -164,6 +138,23 @@ waveform_spi.vcd: ./obj_dir_adcSpi/VadcSpi
 ./obj_dir_adcSpi/VadcSpi: .stamp.verilate_adcSpi
 	@make -C obj_dir_adcSpi -f VadcSpi.mk VadcSpi
 
+waves_top: waveform_top.vcd
+	@echo
+	@echo "## WAVES ##"
+	gtkwave waveform_top.vcd
+
+sim_top: waveform_top.vcd
+
+waveform_top.vcd: ./obj_dir_top/Vtop
+	@./obj_dir_top/Vtop
+
+./obj_dir_top/Vtop: .stamp.verilate_top
+	@make -C obj_dir_top -f Vtop.mk Vtop
+
+.stamp.verilate_top: $(TOP_SRCS) tb_top.cpp
+	verilator $(WARN_FLAGS) -Wno-UNUSED -Wno-DECLFILENAME -Wno-CASEINCOMPLETE --trace -cc $(TOP_SRCS) -GreadDivCount=64 --top-module top --exe tb_top.cpp verilatorTB.cpp --Mdir obj_dir_top -CFLAGS "-DVERILATOR -std=c++17"
+	@touch .stamp.verilate_top
+
 .stamp.verilate_adcSpi: adcSpi.sv tb_adcSpi.cpp
 	verilator $(WARN_FLAGS) -Wno-UNUSED -Wno-DECLFILENAME --trace -cc adcSpi.sv --top-module adcSpi --exe tb_adcSpi.cpp verilatorTB.cpp --Mdir obj_dir_adcSpi -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_adcSpi
@@ -183,11 +174,11 @@ PCF_ARG = $(if $(PCF),--pcf $(PCF),--pcf-allow-unconstrained)
 
 
 yosys_sta:
-	yosys -p "read_verilog -sv $(SRCS); synth_ice40 -top top -abc9 -device u; sta"
+	yosys -p "read_verilog -sv $(TOP_SRCS); synth_ice40 -top top -abc9 -device u; sta"
 yosys_synthesize: top.json
 
-top.json: $(SRCS)
-	yosys -l synth.log -p "read_verilog -sv $(SRCS); synth_ice40 -top top -json top.json"
+top.json: $(TOP_SRCS)
+	yosys -l synth.log -p "read_verilog -sv $(TOP_SRCS); synth_ice40 -top top -json top.json"
 
 nextpnr: top.asc
 
@@ -196,8 +187,8 @@ top.asc: top.json
 		--freq $(FREQ) $(PCF_ARG) --report report.json -l pnr.log
 
 .PHONY: lint_top
-lint_top: $(SRCS)
-	verilator --lint-only $(WARN_FLAGS) -Wno-DECLFILENAME -Wno-CASEINCOMPLETE -sv $(SRCS) --top-module top
+lint_top: $(TOP_SRCS)
+	verilator --lint-only $(WARN_FLAGS) -Wno-DECLFILENAME -Wno-CASEINCOMPLETE -sv $(TOP_SRCS) --top-module top
 
 .PHONY: report_top
 report_top: top.asc

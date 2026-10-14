@@ -22,10 +22,9 @@ typedef enum logic [2:0] {
 } states;
 states state, next_state;
 logic [4:0] fullCounter;
-logic [5:0] internalCounter;
+localparam internalCount = 279; //38000000/17/8000, 8 kSPS for 500 Hz bins
+logic [$clog2(internalCount)-1:0] internalCounter;
 logic changeCount; //indicates change of count
-
-localparam internalCount = 48; //38000000/800000
 
 always_ff @(posedge clk) begin
     if(!resetN) begin

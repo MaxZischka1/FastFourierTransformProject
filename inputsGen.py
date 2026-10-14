@@ -1,4 +1,6 @@
 #Claude generated file to generate possible inputs. Bounded random variable test.
+# `inputsGen.py` writes `inputsRE.hex` (sine, real) and `inputsIM.hex` (cosine, imaginary) in Q1.15:
+#     python3 inputsGen.py <sinFreq> <cosFreq> [-n 16] [--fs 40] [--amp 1.0]
 import argparse
 import numpy as np
 
