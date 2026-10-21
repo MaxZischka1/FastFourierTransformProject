@@ -13,10 +13,10 @@ bool tb_called = false;
 int sclkPeriod = 176;
 std::vector<int> dataIn     = {0,0,0,0,0,0,
                                 1,1,1,1,1,1,1,0,1,1,0,1, 
-                                0,0,
+                                 0,0,
                                 0,0,0,0,0,0,
                                 1,1,0,1,1,1,1,0,1,1,1,1, 
-                                0,0};
+                                 0,0};
 std::vector<int> resetN     = {0,1,1,1,1,1,
                                 1,1,1,1,1,1,1,1,1,1,1,1,
                                  1,1,
@@ -154,8 +154,7 @@ int main(int argc, char** argv){
     VadcSpi *tb = new VadcSpi;
     VerilatedVcdC *tfp = new VerilatedVcdC;
     setup(tb, tfp, argc, argv, "waveform_spi.vcd");
-    if(main_cycles != (int)resetN.size() || main_cycles != (int)startTrans.size())
-        std::cout << "inputs don't match time *ERROR*" << std::endl;
+    if(main_cycles != (int)resetN.size() || main_cycles != (int)startTrans.size()) std::cout << "inputs don't match time *ERROR*" << std::endl;
     ADCTxIn *tx;
     std::deque<ADCTxIn*> in = genTx();
     int total_ticks = in.size();

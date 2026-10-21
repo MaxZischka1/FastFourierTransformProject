@@ -107,6 +107,7 @@ always_comb begin
         end
         Null: begin
             if(fullCounter == 4 && changeCount) next_state = (dataIn == 0)? Shift : Idle;
+            
             else next_state = Null;
         end
         Shift: begin

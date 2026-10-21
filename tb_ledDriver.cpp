@@ -16,7 +16,7 @@ std::vector<uint8_t> magStim = {
 
 std::vector<int> reset, valid;
 uint16_t main_cycles = 0;
-int frameCycles = 128;
+int frameCycles = 64;   //8 display positions at the readDivCount of 8 the Makefile sets
 int checkStart = 2 + frameCycles;
 
 void formatCtrl(){

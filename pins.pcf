@@ -1,5 +1,5 @@
-set_io resetN 2
-set_io startTrans 3
+set_io -pullup yes resetN 2
+set_io -pullup yes startTrans 3
 
 set_io adcData 4
 set_io adcCs 6

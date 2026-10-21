@@ -15,7 +15,8 @@ logic [7:0] bufferOut;
 logic toggleRW;
 
 
-logic [3:0] writeCounter, readCounter, readCounterD;
+logic [3:0] writeCounter;
+logic [2:0] readCounter, readCounterD; //only the 8 displayed bins are scanned, so 8 positions not 16
 
 logic [divCountWidth-1 : 0] divCounter;
 
@@ -43,9 +44,12 @@ always_ff @(posedge clk) begin
     end
 end
 
+logic [3:0] readAddr;
+assign readAddr = 4'(readCounter) + 4'd1; //bin 0 is the DC offset and bins 9 to 15 mirror 7 to 1, neither is shown
+
 always_ff @(posedge clk) begin
     if(validI) ppRam[{toggleRW, writeCounter[0], writeCounter[1], writeCounter[2], writeCounter[3]}] <= magIn;
-    bufferOut <= ppRam[{~toggleRW,readCounter}];
+    bufferOut <= ppRam[{~toggleRW,readAddr}];
 end
 
 always_ff @(posedge clk) begin
@@ -53,8 +57,8 @@ always_ff @(posedge clk) begin
         colOut <= 8'd0;
         rowOut <= 8'd0;
     end
-    else if(readCounterD >= 4'd1 && readCounterD <= 4'd8) begin
-        colOut <= 8'd1 << (readCounterD - 4'd1);
+    else begin
+        colOut <= 8'd1 << readCounterD; //driving grounding outputs through 3904 selecting which column.
         casez(bufferOut)
             8'b1???????: rowOut <= 8'hFF;
             8'b01??????: rowOut <= 8'h7F;
@@ -65,10 +69,6 @@ always_ff @(posedge clk) begin
             8'b0000001?: rowOut <= 8'h03;
             default:     rowOut <= 8'h01;
         endcase
-    end
-    else begin
-        colOut <= 8'd0;
-        rowOut <= 8'd0;
     end
 end
 

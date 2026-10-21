@@ -86,11 +86,11 @@ end
 
 //---- OUTPUT from 1 and 2 is REAL 3 and 4 is IMAG -----
     SB_MAC16 #(
-                .TOPOUTPUT_SELECT(2'b00), // registered outputs CHECK THIS CHANGEEDDEDE
+                .TOPOUTPUT_SELECT(2'b01), // registered outputs CHECK THIS CHANGEEDDEDE
                 .TOPADDSUB_LOWERINPUT(2'b10), // multiplier hi bits
                 .TOPADDSUB_UPPERINPUT(1'b1), // input C
                 .TOPADDSUB_CARRYSELECT(2'b11), // top carry in is bottom carry out
-                .BOTOUTPUT_SELECT(2'b00), // registered outputs  CHECK THIS CHANGEEDDEDE
+                .BOTOUTPUT_SELECT(2'b01), // registered outputs  CHECK THIS CHANGEEDDEDE
                 .BOTADDSUB_LOWERINPUT(2'b10), // multiplier lo bits
                 .BOTADDSUB_UPPERINPUT(1'b1), // input D
                 .BOTADDSUB_CARRYSELECT(2'b00), // bottom carry in constant 0
@@ -121,8 +121,8 @@ end
     ) mult16x16_subRE(
                 .CLK(clk),
                 .CE(en),
-                .A(interOddIM1),
-                .B(WInIM),
+                .A(interOddIM1p),
+                .B(WInIMp),
                 .C(interOdd2MRE[31:16]),
                 .D(interOdd2MRE[15:0]),
                 .O(interOdd3MRE[31:0]),
@@ -131,11 +131,11 @@ end
         );
 //DSP Block #3 and #4 repeats blocks for complement
 SB_MAC16 #(
-                .TOPOUTPUT_SELECT(2'b00), // registered outputs SAME AS ABOVE CHECK
+                .TOPOUTPUT_SELECT(2'b01), // registered outputs SAME AS ABOVE CHECK
                 .TOPADDSUB_LOWERINPUT(2'b10), // multiplier hi bits
                 .TOPADDSUB_UPPERINPUT(1'b1), // input C
                 .TOPADDSUB_CARRYSELECT(2'b11), // top carry in is bottom carry out
-                .BOTOUTPUT_SELECT(2'b00), // registered outputs
+                .BOTOUTPUT_SELECT(2'b01), // registered outputs
                 .BOTADDSUB_LOWERINPUT(2'b10), // multiplier lo bits
                 .BOTADDSUB_UPPERINPUT(1'b1), // input D
                 .BOTADDSUB_CARRYSELECT(2'b00), // bottom carry in constant 0
@@ -164,8 +164,8 @@ SB_MAC16 #(
     ) mult16x16_addIM(
                 .CLK(clk),
                 .CE(en),
-                .A(interOddIM1),
-                .B(WInRE),
+                .A(interOddIM1p),
+                .B(WInREp),
                 .C(interOdd2MIM[31:16]),
                 .D(interOdd2MIM[15:0]),
                 .O(interOdd3MIM[31:0])        

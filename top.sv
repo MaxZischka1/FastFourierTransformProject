@@ -1,4 +1,4 @@
-module top #(parameter readDivCount = 8192)(
+module top #(parameter readDivCount = 16384)(
 `ifdef VERILATOR
     input logic clk,
 `endif
@@ -31,7 +31,7 @@ fifo #(.width(12), .depth(16)) sampleFifo(.clock(clk), .clr(!resetN), .write(sam
 logic signed [15:0] fftOutRE, fftOutIM;
 logic fftValid;
 
-TopLevel fft(.dataInRE({1'b0, fifoOut[11:0], 3'd0}), .dataInIM(16'sd0), .clk(clk),
+TopLevel fft(.dataInRE({~fifoOut[11], fifoOut[10:0], 4'd0}), .dataInIM(16'sd0), .clk(clk),
     .valid(fifoValid), .reset(resetN), .dataOutRE(fftOutRE), .dataOutIM(fftOutIM), .validOut(fftValid));
 
 logic [7:0] mag;

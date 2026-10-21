@@ -1,4 +1,7 @@
+//claude assisted TopLevel testbench has a flow similar to RTL from SPI->R2DIF->MagnitudeDiff->LedDriver
+#include <bitset>
 #include <deque>
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include "verilatorTB.h"
@@ -8,41 +11,233 @@
 
 bool tb_called = false;
 
-int sclkPeriod = 176;
-int readDivCount = 64;
-int frameCycles = 16*readDivCount;
+int sclkPeriod = 176;    //clk cycles in one sclk period, same as internalCount in adcSpi
+int framePeriods = 17;   //sclk periods adcSpi spends on one sample
+int framePulses = 16;    //sclk pulses in those periods, the arm period holds sclk low
+int frameSize = 16;      //samples in one FFT frame
+int main_cycles = 0;
 
-std::vector<int> samples = {2282, 3459, 2892, 3042, 2601,  631,  422, 1658,
-                            1814, 2617, 4004, 3034, 1495, 1485,  874,  458};
+std::vector<int> samples = {
+    0x400, 0x67C, 0x784, 0x67C, 0x400, 0x184, 0x07C, 0x184,
+    0x400, 0x67C, 0x784, 0x67C, 0x400, 0x184, 0x07C, 0x184,
+    0x400, 0x5CE, 0x29E, 0x341, 0x5F4, 0x341, 0x29E, 0x5CE,
+    0x400, 0x232, 0x562, 0x4BF, 0x20C, 0x4BF, 0x562, 0x232
+};
 
-std::vector<int> sol = {0x01, 0x1F, 0x01, 0x01, 0x0F, 0x01, 0x01, 0x01};
+std::vector<int> dataIn, resetN;  //one entry per sclk period, not per clk
+
+void buildStim(){
+    dataIn.push_back(0);   //one period of reset lines the sclk counter up with the frames below
+    resetN.push_back(0);
+    for(int sample : samples){
+        for(int p = 0; p < 5; p++){     //period 0 arms the SPI, 1 to 3 are start and wait, 4 is the MCP3201 null bit
+            dataIn.push_back(0);
+            resetN.push_back(1);
+        }
+        for(int b = 11; b >= 0; b--){   //periods 5 to 16 carry the 12 data bits, MSB first
+            dataIn.push_back((sample >> b) & 1);
+            resetN.push_back(1);
+        }
+    }
+    for(int p = 0; p < 4*framePeriods; p++){  //idle tail, four more conversions of zeros, long enough for the display
+        dataIn.push_back(0);                  //to refresh and be checked but short of the 16 a third FFT frame needs
+        resetN.push_back(1);
+    }
+    main_cycles = dataIn.size() * sclkPeriod;
+}
+
+int spiToVal(std::vector<int> pulses){  //one SPI frame, one bit per sclk pulse
+    int val = 0;                        //pulse 0 is start, 1 and 2 wait, 3 the null bit, 4 to 15 the data
+    for(size_t p = 4; p < pulses.size(); p++){
+        val = (val << 1) | pulses[p];
+    }
+    return val;
+}
+
+std::vector<int16_t> wRe, wIm;
+
+void loadTwiddles(){
+    std::ifstream reHex("twiddleRE.hex"), imHex("twiddleIM.hex");
+    uint32_t re, im;
+    while(reHex >> std::hex >> re && imHex >> std::hex >> im){
+        wRe.push_back((int16_t)re);
+        wIm.push_back((int16_t)im);
+    }
+}
+
+void ValToOutput(std::vector<int> vals, std::vector<int16_t> &re, std::vector<int16_t> &im){
+    int n = vals.size();
+    re.resize(n);
+    im.resize(n);
+    for(int s = 0; s < n; s++){
+        re[s] = (int16_t)((vals[s] ^ 0x800) << 4);   //top.sv pads the 12 bit sample with 4 zero LSBs
+        im[s] = 0;
+    }
+    for(int i = n; i >= 2; i /= 2){
+        int half = i / 2;
+        for(int k = 0; k < n; k += i){
+            for(int j = 0; j < half; j++){
+                int index = j * (n / i);
+                int16_t addRE = (int16_t)((re[k+j] + re[k+j+half]) >> 1);
+                int16_t addIM = (int16_t)((im[k+j] + im[k+j+half]) >> 1);
+                int16_t subRE = (int16_t)((re[k+j] - re[k+j+half]) >> 1);
+                int16_t subIM = (int16_t)((im[k+j] - im[k+j+half]) >> 1);
+                int16_t multRE, multIM;
+                if(i <= 4 && index == 0){   //last two stages have no multiplier, SDFCell0 and Cell1BFU
+                    multRE = subRE;
+                    multIM = subIM;
+                } else if(i == 4){          //index 4 is -j, Cell1BFU swaps and negates instead of multiplying
+                    multRE = subIM;
+                    multIM = (int16_t)-subRE;
+                } else {
+                    multRE = (int16_t)((subRE*wRe[index] - subIM*wIm[index]) >> 15);
+                    multIM = (int16_t)((subRE*wIm[index] + subIM*wRe[index]) >> 15);
+                }
+                re[k+j] = addRE;
+                im[k+j] = addIM;
+                re[k+j+half] = multRE;
+                im[k+j+half] = multIM;
+            }
+        }
+    }
+}
+
+uint8_t OutputToBin(int16_t re, int16_t im){
+    uint16_t a = (re < 0) ? (uint16_t)-re : (uint16_t)re;
+    uint16_t b = (im < 0) ? (uint16_t)-im : (uint16_t)im;
+    uint16_t mx = (a > b) ? a : b;
+    uint16_t mn = (a > b) ? b : a;
+    return (uint8_t)((uint16_t)(mx + (mn >> 1)) >> 8);
+}
+
+uint8_t magToRow(uint8_t mag){
+    if(mag & 0x80) return 0xFF;
+    if(mag & 0x40) return 0x7F;
+    if(mag & 0x20) return 0x3F;
+    if(mag & 0x10) return 0x1F;
+    if(mag & 0x08) return 0x0F;
+    if(mag & 0x04) return 0x07;
+    if(mag & 0x02) return 0x03;
+    return 0x01;
+}
+
+std::vector<int> bitRevIndex = {8, 4, 12, 2, 10, 6, 14, 1}; //ledDriver writes bit reversed, so columns 1 to 8 read bins 1 to 8
+
+std::vector<uint8_t> frameRows(std::vector<int> vals){
+    std::vector<int16_t> re, im;
+    ValToOutput(vals, re, im);
+    std::vector<uint8_t> rows;
+    for(int slot : bitRevIndex){
+        rows.push_back(magToRow(OutputToBin(re[slot], im[slot])));
+    }
+    return rows;
+}
+
+void printRows(const char *name, std::vector<uint8_t> rows){
+    std::cout << name;
+    for(uint8_t row : rows){
+        std::cout << " " << std::bitset<8>(row);
+    }
+    std::cout << std::endl;
+}
 
 class TopTxIn{
     public:
-        bool startTrans, adcData, resetN;
+        bool adcData, resetN, startTrans;
+        int tick;
 };
 
 class TopTxOut{
     public:
-        int colOut, rowOut;
+        int colOut;   //one hot, column 1 is 0x01 up to column 8 at 0x80
+        uint8_t rowOut;
+        int tick;
 };
-
-int leadTicks = 6*sclkPeriod;
-int sampleTicks = 17*sclkPeriod;
 
 std::deque<TopTxIn*> genTx(){
     std::deque<TopTxIn*> ins;
-    for(int t = 0; t < leadTicks + sampleTicks*(int)samples.size(); t++){
-        int sample = (t - leadTicks)/sampleTicks;
-        int period = ((t - leadTicks)/sclkPeriod)%17;
-        TopTxIn *tx = new TopTxIn();
-        tx->startTrans = 1;
-        tx->resetN = (t >= sclkPeriod);
-        tx->adcData = (t >= leadTicks && period < 12) ? (samples[sample] >> (11 - period)) & 1 : 0;
-        ins.push_back(tx);
+    for(size_t p = 0; p < dataIn.size(); p++){
+        for(int c = 0; c < sclkPeriod; c++){
+            TopTxIn *tx = new TopTxIn();
+            tx->adcData = dataIn[p];
+            tx->resetN = resetN[p];
+            tx->startTrans = 1;
+            ins.push_back(tx);
+        }
     }
     return ins;
+}
+
+
+//scoreboard
+
+int readDivCount = 64;                 //ledDriver parameter, set by -GreadDivCount in the Makefile
+int refreshCycles = 8*readDivCount;    //clk cycles the ledDriver takes to walk its 8 display positions
+
+class TopScb{
+    private:
+        std::vector<int> pulses, vals;  //bits of the SPI frame coming in, then whole samples
+        std::vector<uint8_t> rows;      //the 8 rows this frame must put on the display, empty when none is due
+        int column = 0;                 //how many columns of this frame have been checked
+        int checkAt = 0;                //tick from which the display is certain to hold this frame
+
+        void checkColumn(TopTxOut *tx){
+            int solCol = 1 << column;
+            uint8_t solRow = rows[column];
+            if(tx->colOut == solCol && tx->rowOut == solRow){
+                std::cout << "Frame " << frames_fed << " column " << column + 1 << " success  rowOut "
+                          << std::bitset<8>(tx->rowOut) << std::endl;
+            } else {
+                std::cout << "Frame " << frames_fed << " column " << column + 1 << " failed at tick " << tx->tick << std::endl;
+                std::cout << "  DUT colOut " << std::bitset<8>(tx->colOut) << "  rowOut " << std::bitset<8>(tx->rowOut) << std::endl;
+                std::cout << "  TB  colOut " << std::bitset<8>(solCol)     << "  rowOut " << std::bitset<8>(solRow) << std::endl;
+                error_count++;
+            }
+            column++;
+            if(column == (int)rows.size()){   //whole display checked, nothing due until the next frame
+                frames_checked++;
+                rows.clear();
+                column = 0;
+            }
+        }
+    public:
+        int frames_fed = 0;
+        int frames_checked = 0;
+
+        void writeIn(TopTxIn *tx){
+            pulses.push_back(tx->adcData);
+            if((int)pulses.size() == framePulses){
+                vals.push_back(spiToVal(pulses));
+                pulses.clear();
+            }
+            if((int)vals.size() == frameSize){
+                rows = frameRows(vals);
+                vals.clear();
+                frames_fed++;
+                checkAt = tx->tick + refreshCycles;   //the FFT and one whole refresh both finish inside this
+                std::cout << "Frame " << frames_fed << " fed, display must hold these rows from tick " << checkAt << std::endl;
+                printRows("  TB rows: ", rows);
+            }
+            delete tx;
+        }
+
+        void writeOut(TopTxOut *tx){
+            bool nothingDue = rows.empty() || tx->tick < checkAt;   //no frame to check, or the display has not caught up
+            bool midRefresh = column == 0 && tx->colOut != 1;       //never start checking halfway through a refresh
+            if(!nothingDue && !midRefresh) checkColumn(tx);
+            delete tx;
+        }
+
+        void report(){
+            if(!tb_called) std::cout << "colOut never driven *ERROR*" << std::endl;
+            if(frames_checked != frames_fed){
+                std::cout << "checked " << frames_checked << " of " << frames_fed << " FFT frames *ERROR*" << std::endl;
+                error_count++;
+            }
+        }
 };
+
+//drivers
 
 class TopDrive{
     private:
@@ -52,51 +247,60 @@ class TopDrive{
             this->dut = dut;
         }
         void drive(TopTxIn *tx){
-            dut->startTrans = tx->startTrans;
             dut->adcData = tx->adcData;
             dut->resetN = tx->resetN;
+            dut->startTrans = tx->startTrans;
             delete tx;
         }
 };
 
-class TopScb{
-    public:
-        int out_count = 0;
+//monitors
 
-        void writeOut(TopTxOut *tx){
-            if(tx->colOut != (1 << out_count) || tx->rowOut != sol[out_count]){
-                std::cout << "FAILED column " << out_count + 1 << std::endl;
-                std::cout << "DUT colOut:   " << std::hex << tx->colOut << "  rowOut: " << tx->rowOut << std::dec << std::endl;
-                std::cout << "Testbench Sol:   " << std::hex << (1 << out_count) << "  rowOut: " << sol[out_count] << std::dec << std::endl;
-                error_count++;
-            }else{
-                std::cout << "SUCCESS column " << out_count + 1 << std::endl;
-                std::cout << "rowOut:  " << std::hex << tx->rowOut << std::dec << std::endl;
-            }
-            out_count++;
-            delete tx;
-        }
-};
-
-class TopMonOut{
+class TopmonIn{
     private:
         Vtop *dut;
         TopScb *scb;
-        int prevCol = 0;
+        int tick_count = 0;
+        bool prevSclk = 0;
     public:
-        TopMonOut(Vtop *dut, TopScb *scb){
+        TopmonIn(Vtop *dut, TopScb *scb){
             this->dut = dut;
             this->scb = scb;
         }
         void monitor(){
-            if(dut->colOut != prevCol && dut->colOut != 0 && scb->out_count < (int)sol.size()){
-                if(scb->out_count > 0 || dut->colOut == 1){
-                    TopTxOut *tx = new TopTxOut();
-                    tb_called = true;
-                    tx->colOut = dut->colOut;
-                    tx->rowOut = dut->rowOut;
-                    scb->writeOut(tx);
-                }
+            tick_count++;
+            if(dut->adcSclk && !prevSclk){  //adcSpi shifts dataIn on the sclk rising edge, one bit per period
+                TopTxIn *tx = new TopTxIn();
+                tx->adcData = dut->adcData;
+                tx->resetN = dut->resetN;
+                tx->startTrans = dut->startTrans;
+                tx->tick = tick_count;
+                scb->writeIn(tx);
+            }
+            prevSclk = dut->adcSclk;
+        }
+};
+
+class TopmonOut{
+    private:
+        Vtop *dut;
+        TopScb *scb;
+        int tick_count = 0;
+        uint8_t prevCol = 0;
+    public:
+        TopmonOut(Vtop *dut, TopScb *scb){
+            this->dut = dut;
+            this->scb = scb;
+        }
+        void monitor(){
+            tick_count++;
+            if(dut->colOut != 0 && dut->colOut != prevCol){
+                TopTxOut *tx = new TopTxOut();
+                tb_called = true;
+                tx->colOut = dut->colOut;
+                tx->rowOut = dut->rowOut;
+                tx->tick = tick_count;
+                scb->writeOut(tx);
             }
             prevCol = dut->colOut;
         }
@@ -106,34 +310,31 @@ int main(int argc, char** argv){
     Vtop *tb = new Vtop;
     VerilatedVcdC *tfp = new VerilatedVcdC;
     setup(tb, tfp, argc, argv, "waveform_top.vcd");
+    if((int)samples.size() % frameSize != 0)
+        std::cout << "samples don't fill whole FFT frames *ERROR*" << std::endl;
     TopTxIn *tx;
+    loadTwiddles();
+    buildStim();
     std::deque<TopTxIn*> in = genTx();
-    int total_ticks = in.size();
     TopDrive *drv = new TopDrive(tb);
     TopScb *scb = new TopScb();
-    TopMonOut *monOut = new TopMonOut(tb, scb);
 
-    for(int i = 0; i < total_ticks; i++){
+    TopmonIn *monIn = new TopmonIn(tb, scb);
+    TopmonOut *monOut = new TopmonOut(tb, scb);
+
+    for(int i = 0; i < main_cycles; i++){
         if(in.empty()){ std::cout << "Error inputs Empty" << std::endl; exit(1);}
         tx = in.front();
         in.pop_front();
         drv->drive(tx);
         tick(tb,tfp);
-    }
-
-    tb->startTrans = 0;
-    for(int i = 0; i < 3*frameCycles; i++){
-        tick(tb,tfp);
+        monIn->monitor();
         monOut->monitor();
     }
-
-    if(!tb_called) std::cout << "colOut never asserted *ERROR*" << std::endl;
-    if(scb->out_count != (int)sol.size()){
-        std::cout << "checked " << scb->out_count << " of " << sol.size() << " columns *ERROR*" << std::endl;
-        error_count++;
-    }
+    scb->report();
+    delete monIn;
     delete monOut;
     delete scb;
     delete drv;
     return finish(tb,tfp);
-}
+};
