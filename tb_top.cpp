@@ -1,4 +1,5 @@
 //claude assisted TopLevel testbench has a flow similar to RTL from SPI->R2DIF->MagnitudeDiff->LedDriver
+#include <algorithm>
 #include <bitset>
 #include <deque>
 #include <fstream>
@@ -11,17 +12,17 @@
 
 bool tb_called = false;
 
-int sclkPeriod = 176;    //clk cycles in one sclk period, same as internalCount in adcSpi
-int framePeriods = 17;   //sclk periods adcSpi spends on one sample
-int framePulses = 16;    //sclk pulses in those periods, the arm period holds sclk low
+int sclkPeriod = 187;    //clk cycles in one sclk period, same as internalCount in adcSpi
+int framePeriods = 16;   //sclk periods adcSpi spends on one sample
+int framePulses = 15;    //sclk pulses in those periods, the arm period holds sclk low
 int frameSize = 16;      //samples in one FFT frame
 int main_cycles = 0;
 
 std::vector<int> samples = {
-    0x400, 0x67C, 0x784, 0x67C, 0x400, 0x184, 0x07C, 0x184,
-    0x400, 0x67C, 0x784, 0x67C, 0x400, 0x184, 0x07C, 0x184,
-    0x400, 0x5CE, 0x29E, 0x341, 0x5F4, 0x341, 0x29E, 0x5CE,
-    0x400, 0x232, 0x562, 0x4BF, 0x20C, 0x4BF, 0x562, 0x232
+    0x800, 0xA7C, 0xB84, 0xA7C, 0x800, 0x584, 0x47C, 0x584,
+    0x800, 0xA7C, 0xB84, 0xA7C, 0x800, 0x584, 0x47C, 0x584,
+    0x800, 0x9CE, 0x69E, 0x741, 0x9F4, 0x741, 0x69E, 0x9CE,
+    0x800, 0x632, 0x962, 0x8BF, 0x60C, 0x8BF, 0x962, 0x632
 };
 
 std::vector<int> dataIn, resetN;  //one entry per sclk period, not per clk
@@ -30,11 +31,11 @@ void buildStim(){
     dataIn.push_back(0);   //one period of reset lines the sclk counter up with the frames below
     resetN.push_back(0);
     for(int sample : samples){
-        for(int p = 0; p < 5; p++){     //period 0 arms the SPI, 1 to 3 are start and wait, 4 is the MCP3201 null bit
+        for(int p = 0; p < 4; p++){     //period 0 arms the SPI, 1 and 2 are the MCP3201 sample clocks, 3 is the null bit
             dataIn.push_back(0);
             resetN.push_back(1);
         }
-        for(int b = 11; b >= 0; b--){   //periods 5 to 16 carry the 12 data bits, MSB first
+        for(int b = 11; b >= 0; b--){   //periods 4 to 15 carry the 12 data bits, MSB first
             dataIn.push_back((sample >> b) & 1);
             resetN.push_back(1);
         }
@@ -47,8 +48,8 @@ void buildStim(){
 }
 
 int spiToVal(std::vector<int> pulses){  //one SPI frame, one bit per sclk pulse
-    int val = 0;                        //pulse 0 is start, 1 and 2 wait, 3 the null bit, 4 to 15 the data
-    for(size_t p = 4; p < pulses.size(); p++){
+    int val = 0;                        //pulses 0 and 1 are the sample clocks, 2 the null bit, 3 to 14 the data
+    for(size_t p = 3; p < pulses.size(); p++){
         val = (val << 1) | pulses[p];
     }
     return val;
@@ -107,28 +108,34 @@ uint8_t OutputToBin(int16_t re, int16_t im){
     uint16_t b = (im < 0) ? (uint16_t)-im : (uint16_t)im;
     uint16_t mx = (a > b) ? a : b;
     uint16_t mn = (a > b) ? b : a;
-    return (uint8_t)((uint16_t)(mx + (mn >> 1)) >> 8);
+    uint16_t mag = (uint16_t)(mx + (mn >> 1));
+    return (mag & 0x8000) ? 0xFF : (uint8_t)(mag >> 7);
 }
 
-uint8_t magToRow(uint8_t mag){
-    if(mag & 0x80) return 0xFF;
-    if(mag & 0x40) return 0x7F;
-    if(mag & 0x20) return 0x3F;
-    if(mag & 0x10) return 0x1F;
-    if(mag & 0x08) return 0x0F;
-    if(mag & 0x04) return 0x07;
-    if(mag & 0x02) return 0x03;
-    return 0x01;
+int magToLevel(uint8_t mag){
+    int level = 0;
+    while(mag >> level) level++;
+    return level;
 }
 
 std::vector<int> bitRevIndex = {8, 4, 12, 2, 10, 6, 14, 1}; //ledDriver writes bit reversed, so columns 1 to 8 read bins 1 to 8
 
+int decayFrames = 2;
+std::vector<int> held(8, 0);
+int framesShown = 0;
+
 std::vector<uint8_t> frameRows(std::vector<int> vals){
     std::vector<int16_t> re, im;
     ValToOutput(vals, re, im);
+    bool decay = framesShown % decayFrames == decayFrames - 1;
+    framesShown++;
     std::vector<uint8_t> rows;
-    for(int slot : bitRevIndex){
-        rows.push_back(magToRow(OutputToBin(re[slot], im[slot])));
+    for(size_t c = 0; c < bitRevIndex.size(); c++){
+        int slot = bitRevIndex[c];
+        int level = magToLevel(OutputToBin(re[slot], im[slot]));
+        int decayed = held[c] - (decay && held[c] > 0);
+        held[c] = std::max(level, decayed);
+        rows.push_back((uint8_t)(0xFF >> (8 - held[c])));
     }
     return rows;
 }

@@ -18,3 +18,9 @@ obj_dir*/
 # Trace files
 *.dat
 *.log
+
+#Yosys Files
+*.json
+*.asc
+.DS_Store
+*.vvp

@@ -1,23 +1,31 @@
 MODULE=TopLevel
 SRCS = $(MODULE).sv MUX2.sv SDFCell.sv dataAdder.sv DelayLine.sv SBM16.sv SDFCell0.sv Cell1BFU.sv  
 TOP_SRCS = top.sv adcSpi.sv fifo.sv magToBin.sv ledDriver.sv $(SRCS)
+SB_MAC16_SIM = obj_dir_cells/SB_MAC16.v
 # UNDRIVEN: allow module outputs/signals that are not driven yet
 WARN_FLAGS = -Wall -Wno-UNDRIVEN -Wno-PINCONNECTEMPTY -Wno-UNUSEDSIGNAL -Wno-EOFNEWLINE
 
 .PHONY:lint
-lint: $(SRCS)
-	verilator --lint-only -Wall -Wno-EOFNEWLINE -sv $(SRCS) --top-module TopLevel
+lint: $(SRCS) $(SB_MAC16_SIM)
+	verilator --lint-only $(WARN_FLAGS) -sv $(SRCS) $(SB_MAC16_SIM) --top-module TopLevel
+
+$(SB_MAC16_SIM):
+	mkdir -p obj_dir_cells
+	{ for w in WIDTHEXPAND WIDTHTRUNC UNUSEDSIGNAL UNDRIVEN DECLFILENAME; do echo "/* verilator lint_off $$w */"; done; awk '/^module SB_MAC16/,/^endmodule/' $(shell yosys-config --datdir)/ice40/cells_sim.v; } > $(SB_MAC16_SIM)
 
 .PHONY: lint_adcSpi
-lint_adcSpi: $(ADCSPI_SRCS)
-	verilator --lint-only -Wall -Wno-EOFNEWLINE -Wno-DECLFILENAME -sv $(ADCSPI_SRCS) --top-module adcSpi
+lint_adcSpi: adcSpi.sv
+	verilator --lint-only -Wall -Wno-EOFNEWLINE -Wno-DECLFILENAME -sv adcSpi.sv --top-module adcSpi
 
 .PHONY: clean
 clean:
 	rm -rf .stamp.*;
-	rm -rf ./obj_dir_TL
+	rm -rf ./obj_dir_TopLevel
 	rm -rf ./obj_dir_bram
 	rm -rf waveform_TopLevel.vcd
+	rm -rf ./obj_dir_SBM16 ./obj_dir_cells waveform_SBM16.vcd
+	rm -rf ./obj_dir_SDFCell waveform_SDFCell.vcd
+	rm -rf ./obj_dir_top waveform_top.vcd
 	rm -rf ./obj_dir_adcSpi
 	rm -rf waveform_spi.vcd
 	rm -rf ./obj_dir_magToBin
@@ -26,7 +34,7 @@ clean:
 	rm -rf waveform_LEDDr.vcd
 	rm -f fftOutRE.hex fftOutIM.hex
 	rm -rf waveform_bram.vcd
-	rm -f top.json top.asc synth.log pnr.log pnr.json report.json
+	rm -f top.json top.asc top.bin synth.log pnr.log pnr.json report.json timing.json
 
 
 waves_bram: waveform_bram.vcd
@@ -59,8 +67,8 @@ waveform_SBM16.vcd: ./obj_dir_SBM16/VSBM16
 ./obj_dir_SBM16/VSBM16: .stamp.verilate_SBM16
 	@make -C obj_dir_SBM16 -f VSBM16.mk VSBM16
 
-.stamp.verilate_SBM16: SBM16.sv tb_SBM16.cpp
-	verilator $(WARN_FLAGS) --trace -cc SBM16.sv --top-module SBM16 --exe tb_SBM16.cpp verilatorTB.cpp --Mdir obj_dir_SBM16 -CFLAGS "-DVERILATOR -std=c++17"
+.stamp.verilate_SBM16: SBM16.sv tb_SBM16.cpp $(SB_MAC16_SIM)
+	verilator $(WARN_FLAGS) --trace -cc SBM16.sv $(SB_MAC16_SIM) -GlogN=4 -GlogSize=4 --top-module SBM16 --exe tb_SBM16.cpp verilatorTB.cpp --Mdir obj_dir_SBM16 -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_SBM16
 
 waves_SDFCell: waveform_SDFCell.vcd
@@ -76,9 +84,26 @@ waveform_SDFCell.vcd: ./obj_dir_SDFCell/VSDFCell
 ./obj_dir_SDFCell/VSDFCell: .stamp.verilate_SDFCell
 	@make -C obj_dir_SDFCell -f VSDFCell.mk VSDFCell
 
-.stamp.verilate_SDFCell: $(SRCS) tb_SDFCell.cpp
-	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) --top-module SDFCell --exe tb_SDFCell.cpp verilatorTB.cpp --Mdir obj_dir_SDFCell -CFLAGS "-DVERILATOR -std=c++17"
+.stamp.verilate_SDFCell: $(SRCS) tb_SDFCell.cpp $(SB_MAC16_SIM)
+	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) $(SB_MAC16_SIM) --top-module SDFCell --exe tb_SDFCell.cpp verilatorTB.cpp --Mdir obj_dir_SDFCell -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_SDFCell
+
+waves_TopLevel: waveform_TopLevel.vcd
+	@echo
+	@echo "## WAVES ##"
+	gtkwave waveform_TopLevel.vcd
+
+sim_TopLevel: waveform_TopLevel.vcd
+
+waveform_TopLevel.vcd: ./obj_dir_TopLevel/VTopLevel
+	@./obj_dir_TopLevel/VTopLevel
+
+./obj_dir_TopLevel/VTopLevel: .stamp.verilate_TopLevel
+	@make -C obj_dir_TopLevel -f VTopLevel.mk VTopLevel
+
+.stamp.verilate_TopLevel: $(SRCS) tb_TopLevel.cpp $(SB_MAC16_SIM)
+	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc $(SRCS) $(SB_MAC16_SIM) --top-module TopLevel --exe tb_TopLevel.cpp verilatorTB.cpp --Mdir obj_dir_TopLevel -CFLAGS "-DVERILATOR -std=c++17"
+	@touch .stamp.verilate_TopLevel
 
 waves_magToBin: waveform_magToBin.vcd
 	@echo
@@ -97,9 +122,14 @@ waveform_magToBin.vcd: ./obj_dir_magToBin/VmagToBin fftOutRE.hex fftOutIM.hex
 	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc magToBin.sv --top-module magToBin --exe tb_magToBin.cpp verilatorTB.cpp --Mdir obj_dir_magToBin -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_magToBin
 
+fftOutRE.hex: magGen.py inputsRE.hex inputsIM.hex twiddleRE.hex twiddleIM.hex
+	python3 magGen.py
+
+fftOutIM.hex: fftOutRE.hex
+
 .PHONY: lint_magToBin
 lint_magToBin: magToBin.sv
-	verilator --lint-only -Wall -Wno-EOFNEWLINE -sv magToBin.sv --top-module magToBin
+	verilator --lint-only $(WARN_FLAGS) -sv magToBin.sv --top-module magToBin
 
 waves_LEDDr: waveform_LEDDr.vcd
 	@echo
@@ -115,12 +145,12 @@ waveform_LEDDr.vcd: ./obj_dir_LEDDr/VledDriver
 	@make -C obj_dir_LEDDr -f VledDriver.mk VledDriver
 
 .stamp.verilate_LEDDr: ledDriver.sv tb_ledDriver.cpp
-	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc ledDriver.sv -GreadDivCount=8 --top-module ledDriver --exe tb_ledDriver.cpp verilatorTB.cpp --Mdir obj_dir_LEDDr -CFLAGS "-DVERILATOR -std=c++17"
+	verilator $(WARN_FLAGS) -Wno-UNUSED --trace -cc ledDriver.sv -GreadDivCount=8 -GdecayFrames=1 --top-module ledDriver --exe tb_ledDriver.cpp verilatorTB.cpp --Mdir obj_dir_LEDDr -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_LEDDr
 
 .PHONY: lint_LEDDr
 lint_LEDDr: ledDriver.sv
-	verilator --lint-only -Wall -Wno-EOFNEWLINE -sv ledDriver.sv --top-module ledDriver
+	verilator --lint-only $(WARN_FLAGS) -sv ledDriver.sv --top-module ledDriver
 
 waves_adcSpi: waveform_spi.vcd
 	@echo
@@ -148,8 +178,8 @@ waveform_top.vcd: ./obj_dir_top/Vtop
 ./obj_dir_top/Vtop: .stamp.verilate_top
 	@make -C obj_dir_top -f Vtop.mk Vtop
 
-.stamp.verilate_top: $(TOP_SRCS) tb_top.cpp
-	verilator $(WARN_FLAGS) -Wno-UNUSED -Wno-DECLFILENAME -Wno-CASEINCOMPLETE --trace -cc $(TOP_SRCS) -GreadDivCount=64 --top-module top --exe tb_top.cpp verilatorTB.cpp --Mdir obj_dir_top -CFLAGS "-DVERILATOR -std=c++17"
+.stamp.verilate_top: $(TOP_SRCS) tb_top.cpp $(SB_MAC16_SIM)
+	verilator $(WARN_FLAGS) -Wno-UNUSED -Wno-DECLFILENAME -Wno-CASEINCOMPLETE --trace -cc $(TOP_SRCS) $(SB_MAC16_SIM) -GreadDivCount=64 -GdecayFrames=2 --top-module top --exe tb_top.cpp verilatorTB.cpp --Mdir obj_dir_top -CFLAGS "-DVERILATOR -std=c++17"
 	@touch .stamp.verilate_top
 
 .stamp.verilate_adcSpi: adcSpi.sv tb_adcSpi.cpp
@@ -163,9 +193,16 @@ yosys_synthesize: top.json
 top.json: $(TOP_SRCS)
 	yosys -l synth.log -p "read_verilog -sv $(TOP_SRCS); synth_ice40 -top top -json top.json"
 
-next_pnrRep: 
+next_pnrRep: top.asc
+
+top.asc: top.json pins.pcf
 	nextpnr-ice40 --up5k --package sg48 --json top.json --pcf pins.pcf --asc top.asc --freq 24 --report timing.json
 
+bitstream: top.bin
+
+top.bin: top.asc
+	icepack top.asc top.bin
+
 .PHONY: lint_top
-lint_top: $(TOP_SRCS)
-	verilator --lint-only $(WARN_FLAGS) -Wno-DECLFILENAME -Wno-CASEINCOMPLETE -sv $(TOP_SRCS) --top-module top
+lint_top: $(TOP_SRCS) $(SB_MAC16_SIM)
+	verilator --lint-only $(WARN_FLAGS) -Wno-DECLFILENAME -Wno-CASEINCOMPLETE -sv $(TOP_SRCS) $(SB_MAC16_SIM) --top-module top

@@ -12,60 +12,6 @@ module SBM16 #(parameter int logN = 3, logSize = 3)(
     output logic  signed [15:0] dOutOddIM,
     output logic  signed [15:0] dOutOddRE
 );
-`ifdef VERILATOR
-/* verilator lint_off UNUSEDSIGNAL */
-logic signed [31:0] interOdd2MRE, interOdd2MIM, interOdd3MRE, interOdd3MIM;
-logic signed [15:0] interOddIM1p, WInREp, WInIMp, WInRE, WInIM;
-localparam int stride = 1 << (logN - logSize);
-logic [logN-2:0] counter;
-logic [1:0] validOpipe;
-
-logic [15:0] twiddleRE [1 << (logN-1)]; 
-logic [15:0] twiddleIM [1 << (logN-1)];
-
-initial begin
-    $readmemh("twiddleRE.hex", twiddleRE);
-    $readmemh("twiddleIM.hex", twiddleIM);
-end
-
-/* verilator lint_on UNUSEDSIGNAL */
-
-    assign WInRE = twiddleRE[counter];
-    assign WInIM = twiddleIM[counter];
-
-    always_ff @(posedge clk) begin //read greg sitts article new reset logic format.
-        if(!reset) begin
-            validOpipe <= 2'd0;
-            counter <= '0;
-        end
-        else begin
-            if(en) begin
-                validOpipe <= {validOpipe[0], valid};
-                if(valid) counter <= counter + (logN-1)'(stride); //always just wraps
-        end
-        end
-    end
-
-    always_ff @(posedge clk) begin
-            
-        interOddIM1p <= interOddIM1;
-        WInIMp <= WInIM;
-        WInREp <= WInRE;
-        //
-
-        interOdd2MRE <= interOddRE1*WInRE;
-        interOdd2MIM <= interOddRE1*WInIM;
-
-        interOdd3MRE <= interOdd2MRE - interOddIM1p*WInIMp;
-        interOdd3MIM <= interOdd2MIM + interOddIM1p*WInREp;
-
-        
-    end
-        assign dOutOddRE = interOdd3MRE[30:15];
-        assign dOutOddIM = interOdd3MIM[30:15];
-        assign validO = validOpipe[1];
-    
-`else//TO DO : Check datasheet
     logic signed [31:0] interOdd2MRE, interOdd2MIM, interOdd3MRE, interOdd3MIM;
     logic signed [15:0] interOddIM1p, WInREp, WInIMp, WInRE, WInIM;
     localparam int stride = 1 << (logN - logSize);
@@ -98,6 +44,12 @@ end
                 .B_SIGNED(1'b1)
     ) mult16x16_noAddRE(
         
+                .AHOLD(1'b0), .BHOLD(1'b0), .CHOLD(1'b0), .DHOLD(1'b0),
+                .IRSTTOP(1'b0), .IRSTBOT(1'b0), .ORSTTOP(1'b0), .ORSTBOT(1'b0),
+                .OLOADTOP(1'b0), .OLOADBOT(1'b0), .OHOLDTOP(1'b0), .OHOLDBOT(1'b0),
+                .CI(1'b0), .ACCUMCI(1'b0), .SIGNEXTIN(1'b0),
+                .CO(), .ACCUMCO(), .SIGNEXTOUT(),
+                .ADDSUBTOP(1'b0), .ADDSUBBOT(1'b0),
                 .CLK(clk),
                 .CE(en),
                 .A(interOddRE1),
@@ -112,13 +64,18 @@ end
                 .TOPOUTPUT_SELECT(2'b01), // registered outputs
                 .TOPADDSUB_LOWERINPUT(2'b10), // multiplier hi bits
                 .TOPADDSUB_UPPERINPUT(1'b1), // input C
-                .TOPADDSUB_CARRYSELECT(2'b11), // top carry in is bottom carry out
+                .TOPADDSUB_CARRYSELECT(2'b10), // top carry in is bottom carry out
                 .BOTOUTPUT_SELECT(2'b01), // registered outputs
                 .BOTADDSUB_LOWERINPUT(2'b10), // multiplier lo bits
                 .BOTADDSUB_UPPERINPUT(1'b1),// input D
                 .A_SIGNED(1'b1),
                 .B_SIGNED(1'b1) 
     ) mult16x16_subRE(
+                .AHOLD(1'b0), .BHOLD(1'b0), .CHOLD(1'b0), .DHOLD(1'b0),
+                .IRSTTOP(1'b0), .IRSTBOT(1'b0), .ORSTTOP(1'b0), .ORSTBOT(1'b0),
+                .OLOADTOP(1'b0), .OLOADBOT(1'b0), .OHOLDTOP(1'b0), .OHOLDBOT(1'b0),
+                .CI(1'b0), .ACCUMCI(1'b0), .SIGNEXTIN(1'b0),
+                .CO(), .ACCUMCO(), .SIGNEXTOUT(),
                 .CLK(clk),
                 .CE(en),
                 .A(interOddIM1p),
@@ -142,6 +99,12 @@ SB_MAC16 #(
                 .A_SIGNED(1'b1),
                 .B_SIGNED(1'b1)
     ) mult16x16_noAddIM(
+                .AHOLD(1'b0), .BHOLD(1'b0), .CHOLD(1'b0), .DHOLD(1'b0),
+                .IRSTTOP(1'b0), .IRSTBOT(1'b0), .ORSTTOP(1'b0), .ORSTBOT(1'b0),
+                .OLOADTOP(1'b0), .OLOADBOT(1'b0), .OHOLDTOP(1'b0), .OHOLDBOT(1'b0),
+                .CI(1'b0), .ACCUMCI(1'b0), .SIGNEXTIN(1'b0),
+                .CO(), .ACCUMCO(), .SIGNEXTOUT(),
+                .ADDSUBTOP(1'b0), .ADDSUBBOT(1'b0),
                 .CLK(clk),
                 .CE(en),
                 .A(interOddRE1),
@@ -162,6 +125,12 @@ SB_MAC16 #(
                 .A_SIGNED(1'b1),
                 .B_SIGNED(1'b1) 
     ) mult16x16_addIM(
+                .AHOLD(1'b0), .BHOLD(1'b0), .CHOLD(1'b0), .DHOLD(1'b0),
+                .IRSTTOP(1'b0), .IRSTBOT(1'b0), .ORSTTOP(1'b0), .ORSTBOT(1'b0),
+                .OLOADTOP(1'b0), .OLOADBOT(1'b0), .OHOLDTOP(1'b0), .OHOLDBOT(1'b0),
+                .CI(1'b0), .ACCUMCI(1'b0), .SIGNEXTIN(1'b0),
+                .CO(), .ACCUMCO(), .SIGNEXTOUT(),
+                .ADDSUBTOP(1'b0), .ADDSUBBOT(1'b0),
                 .CLK(clk),
                 .CE(en),
                 .A(interOddIM1p),
@@ -195,6 +164,5 @@ SB_MAC16 #(
         assign validO = validOpipe[1];
 
 //Feed outputs into a 16 bit adder made from LUTs. Try to implement two BFUs in architechture.
-`endif
 endmodule
 

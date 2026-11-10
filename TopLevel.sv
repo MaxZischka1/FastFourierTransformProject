@@ -10,7 +10,7 @@ module TopLevel(
     output logic validOut
 );
     logic signed [15:0] dataInREInt[3], dataInIMInt [3];
-    logic validInt[10];
+    logic validInt[3];
 
      SDFCell#(.size(16))sdfCell4(.dataInRE(dataInRE), .dataInIM(dataInIM), .clk(clk), .valid(valid), .reset(reset), 
     .dataOutRE(dataInREInt[0]), .dataOutIM(dataInIMInt[0]), .validOut(validInt[0]));

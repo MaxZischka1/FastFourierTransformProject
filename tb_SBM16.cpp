@@ -1,235 +1,154 @@
-//TO DO AFTER GDS PARSER. FILE READING NEEDS CHANGING
 #include <deque>
-#include <cstdint>
-#include <cstdlib>
-#include <cmath>
-#include <iostream>
-#include <stdlib.h>
 #include <fstream>
+#include <iostream>
 #include <random>
+#include <vector>
 #include "verilatorTB.h"
-#include <VSBM16.h>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
+#include <VSBM16.h>
 
-int reset_cycles = 3;
+bool tb_called = false;
 
-//Transaction Item Input
 class SBMTxIn{
     public:
-        int16_t interOddRE1, interOddIM1;
-        int16_t WInRE, WInIM;
-        bool reset, en;
+        int16_t re, im;
+        bool valid, reset;
 };
-//Transaction Item Output
+
 class SBMTxOut{
     public:
-        int16_t dOutOddIM, dOutOddRE, validO;
-};
-//Try and load the queue here consult TB used in parser
-//figure these out later
-SBMTxIn* SBMTxGen(){
-    SBMTxIn* tx = new SBMTxIn();
-    std::ifstream inReal("inputsRE.hex");
-    std::ifstream inImag("inputsIM.hex");
-    inReal>>std::hex>>tx->interOddRE1;
-    inReal>>std::hex>>tx->interOddIM1;
-    tx->reset = 1;
-    tx->en = 1;
-    return tx;
+        int16_t re, im;
 };
 
-
-
-
-std::deque<SBMTxIn*> SBMTxGenQueue(){
-    std::deque<SBMTxIn*> seq;
-
-    SBMTxIn* tx = new SBMTxIn();
-    tx->reset = 0;
-    tx->en = 0;
-    tx->interOddIM1 = 0;
-    tx->interOddRE1 = 0;
-    seq.push_back(tx);
-
-
-    for(int i = 0; i < 15; i++){
-        SBMTxIn* tx = SBMTxGen();
-        seq.push_back(tx);
+std::deque<SBMTxIn*> genTx(){
+    std::mt19937 rng(1);
+    std::deque<SBMTxIn*> ins;
+    for(int i = 0; i < 20000; i++){
+        SBMTxIn *tx = new SBMTxIn();
+        tx->reset = i >= 4;
+        tx->valid = tx->reset && rng() % 4 != 0;
+        tx->re = (int16_t)rng();
+        tx->im = (int16_t)rng();
+        ins.push_back(tx);
     }
-
-    // SBMTxIn* tx3 = new SBMTxIn();
-    // tx->reset = 1;
-    // tx->en = 1;
-    // tx->interOddIM1 = 0;
-    // tx->interOddRE1 = 0;
-    // seq.push_back(tx3);
-
-    return seq;
-
+    return ins;
 }
 
-//Input Driver
-class SBMTxDrive{
+class SBMDrive{
     private:
         VSBM16 *dut;
     public:
-        SBMTxDrive(VSBM16 *dut){
+        SBMDrive(VSBM16 *dut){
             this->dut = dut;
         }
-        
         void drive(SBMTxIn *tx){
-
-            dut->interOddRE1 = tx->interOddRE1;
-            dut->interOddIM1 = tx->interOddIM1;
-            dut->en = tx->en;
             dut->reset = tx->reset;
-            delete tx;
-
+            dut->valid = tx->valid;
+            dut->en = 1;
+            dut->interOddRE1 = tx->re;
+            dut->interOddIM1 = tx->im;
         }
 };
 
-int16_t WInREin[] = {0x7FFF, 0x7642, 0x5A82, 0x30FC, 0x0000, 0xCF04, 0xA57E, 0x89BE};
-int16_t WInIMin[] = {0x0000, 0xCF04, 0xA57E, 0x89BE, 0x8000, 0x89BE, 0xA57E, 0xCF04};
-
-int counter = 0;
-class SBM16Scb{
+class SBMScb{
     private:
-        std::deque<SBMTxIn*> in_q;
+        std::vector<int16_t> wRe, wIm;
+        std::deque<SBMTxOut*> sol;
+        int counter = 0;
     public:
-        int sumOddRE;
-        int sumOddIM;
-        int WInRE;
-        int WInIM;
+        int checks = 0;
+
+        SBMScb(){
+            std::ifstream reHex("twiddleRE.hex"), imHex("twiddleIM.hex");
+            uint32_t re, im;
+            while(reHex >> std::hex >> re && imHex >> std::hex >> im){
+                wRe.push_back((int16_t)re);
+                wIm.push_back((int16_t)im);
+            }
+        }
+
         void writeIn(SBMTxIn *tx){
-            in_q.push_back(tx);
+            if(tx->valid){
+                SBMTxOut *exp = new SBMTxOut();
+                uint32_t re = (uint32_t)((int64_t)tx->re * wRe[counter] - (int64_t)tx->im * wIm[counter]);
+                uint32_t im = (uint32_t)((int64_t)tx->re * wIm[counter] + (int64_t)tx->im * wRe[counter]);
+                exp->re = (int16_t)(re >> 15);
+                exp->im = (int16_t)(im >> 15);
+                sol.push_back(exp);
+                counter = (counter + 1) % wRe.size();
+            }
+            delete tx;
         }
+
         void writeOut(SBMTxOut *tx){
-            if(in_q.empty()){
-                std::cout << "Error SBMTxIN Empty" << std::endl;
-                exit(1);
-            }
-            SBMTxIn *in;
-            if(!tx->validO){
-                delete tx; 
+            if(sol.empty()){
+                std::cout << "validO with no input *ERROR*" << std::endl;
+                error_count++;
+                delete tx;
                 return;
-            }//for pipelining
-            WInRE = WInREin[counter];
-            WInIM = WInIMin[counter];
-            
-            in = in_q.front();
-            in_q.pop_front();
-
-            if(in->en){
-                if(counter == 7) counter = 0;
-                else counter = counter + 1;   
             }
-            if(!in->reset){
-               sumOddRE = 0;
-               sumOddIM = 0;
-            }else if(in->en){
-                int interOddRE1 = in->interOddRE1;
-                int interOddIM1 = in->interOddIM1;
-
-                int64_t interOddRE3 = (interOddRE1*WInRE -  interOddIM1*WInIM);
-                int64_t interOddIM3 = (interOddRE1*WInIM +  interOddIM1*WInRE);
-
-                sumOddRE = (int)(interOddRE3>>16);
-                sumOddIM = (int)(interOddIM3>>16);
+            SBMTxOut *exp = sol.front();
+            sol.pop_front();
+            if(tx->re != exp->re || tx->im != exp->im){
+                if(error_count < 8){
+                    std::cout << "Mismatch at check " << checks << std::endl;
+                    std::cout << "  DUT re " << tx->re << "  im " << tx->im << std::endl;
+                    std::cout << "  TB  re " << exp->re << "  im " << exp->im << std::endl;
+                }
+                error_count++;
             }
-
-        if
-            ((sumOddRE==tx->dOutOddRE)&&(sumOddIM==tx->dOutOddIM)){
-            std::cout << "TestBench Success" << std::endl;
-            std::cout<<"Actaul  validO: "<<tx->validO<<std::endl;
-        }else{
-            std::cout <<"TestBench Error" <<std::endl;
-            std::cout <<"Expected  sumOddRE: "<<sumOddRE<<"  sumOddIM:  "<<sumOddIM<<std::endl;
-            std::cout<<"Actual  outRE: "<<tx->dOutOddRE<<"  outIM:  "<<tx->dOutOddIM<<std::endl;
-            std::cout<<"Actaul  validO: "<<tx->validO<<std::endl;
-            std::cout<<"Inputs     interRE: "<< in->interOddRE1 <<" oddIM: "<< in->interOddIM1
-            <<" omgRE: "<<WInRE<<" omgIM: "<<WInIM<<std::endl;
-             std::cout <<"Sim Time: "<<main_time<<std::endl;
-            error_count++;
+            checks++;
+            delete exp;
+            delete tx;
         }
-        delete in;
-        delete tx;
-        }
-    };
 
-    
-//Monitor for TX
-class SBM16MonIn{
+        void report(){
+            std::cout << checks << " checks, " << sol.size() << " still pending" << std::endl;
+            if(sol.size() > 2) error_count++;
+        }
+};
+
+class SBMmonOut{
     private:
         VSBM16 *dut;
-        SBM16Scb *scb;
+        SBMScb *scb;
     public:
-        SBM16MonIn(VSBM16 *dut,  SBM16Scb *scb){
-            this->dut = dut;
-            this->scb = scb;
-        }
-
-        void monitor(){
-            SBMTxIn *tx = new SBMTxIn;
-            
-            tx->interOddRE1 = dut->interOddRE1;
-            tx->interOddIM1 = dut->interOddIM1;
-            tx->en = dut->en;
-            tx->reset = dut->reset;
-            scb->writeIn(tx);
-        }
-};
-
-
-
-class SBM16MonOut{
-    private:
-        VSBM16 *dut;
-        SBM16Scb *scb;
-    public: 
-        SBM16MonOut(VSBM16 *dut, SBM16Scb *scb){
+        SBMmonOut(VSBM16 *dut, SBMScb *scb){
             this->dut = dut;
             this->scb = scb;
         }
         void monitor(){
-            SBMTxOut *tx = new SBMTxOut;
-            tx->dOutOddRE = dut->dOutOddRE;
-            tx->dOutOddIM = dut->dOutOddIM;
-            tx->validO = dut->validO;
-            scb->writeOut(tx);
+            if(dut->validO){
+                tb_called = true;
+                SBMTxOut *tx = new SBMTxOut();
+                tx->re = (int16_t)dut->dOutOddRE;
+                tx->im = (int16_t)dut->dOutOddIM;
+                scb->writeOut(tx);
+            }
         }
 };
-
-
-
-//Building writeOut that offloads inputs, does the operations and compares to dut output
-
-
 
 int main(int argc, char** argv){
     VSBM16 *tb = new VSBM16;
     VerilatedVcdC *tfp = new VerilatedVcdC;
     setup(tb, tfp, argc, argv, "waveform_SBM16.vcd");
-    SBMTxIn *tx;
-    int max_time = 8;
-    
-    SBMTxDrive *drv = new SBMTxDrive(tb);
-    SBM16Scb *scb = new SBM16Scb();
-    SBM16MonIn *monIn = new SBM16MonIn(tb,scb);
-    SBM16MonOut *monOut = new SBM16MonOut(tb,scb);
+    std::deque<SBMTxIn*> in = genTx();
+    SBMDrive *drv = new SBMDrive(tb);
+    SBMScb *scb = new SBMScb();
+    SBMmonOut *monOut = new SBMmonOut(tb, scb);
 
-    for(int cycles = 0; cycles<max_time; cycles++){
-        tx = SBMTxGen();
+    while(!in.empty()){
+        SBMTxIn *tx = in.front();
+        in.pop_front();
         drv->drive(tx);
-        tick(tb,tfp);
-        monIn->monitor();
+        scb->writeIn(tx);
+        tick(tb, tfp);
         monOut->monitor();
-        
     }
-    delete monIn;
+    scb->report();
     delete monOut;
     delete scb;
     delete drv;
-    return finish(tb,tfp);
-    
+    return finish(tb, tfp);
 }

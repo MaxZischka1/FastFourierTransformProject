@@ -22,7 +22,7 @@ typedef enum logic [2:0] {
 } states;
 states state, next_state;
 logic [4:0] fullCounter;
-localparam internalCount = 176; //24000000/17/8000, 8 kSPS for 500 Hz bins
+localparam internalCount = 187; //24000000/16/8000, 8 kSPS for 500 Hz bins
 logic [$clog2(internalCount)-1:0] internalCounter;
 logic changeCount; //indicates change of count
 
@@ -102,16 +102,16 @@ always_comb begin
             else next_state = Start;
         end
         Wait: begin
-            if(fullCounter == 3 && changeCount) next_state = Null;
+            if(fullCounter == 2 && changeCount) next_state = Null;
             else next_state = Wait;
         end
         Null: begin
-            if(fullCounter == 4 && changeCount) next_state = (dataIn == 0)? Shift : Idle;
+            if(fullCounter == 3 && changeCount) next_state = (dataIn == 0)? Shift : Idle;
             
             else next_state = Null;
         end
         Shift: begin
-            if(changeCount && fullCounter == 16) next_state = Finish;
+            if(changeCount && fullCounter == 15) next_state = Finish;
             else next_state = Shift;
         end
         Finish: begin

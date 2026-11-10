@@ -30,7 +30,7 @@ always_ff @(posedge clk) begin
 
 end
 
-assign MagOut = MagOut17[15:8];
+assign MagOut = MagOut17[15] ? 8'hFF : MagOut17[14:7];
 
 assign validO = validPipe[2];
 

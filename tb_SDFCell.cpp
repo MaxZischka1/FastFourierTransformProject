@@ -111,8 +111,8 @@ class SDFScb{
             for(int i = 0; i < 4; i++){
                 int dataOutOddSCBRE = (int16_t)inRe[i] - (int16_t)inRe[i+4];
                 int dataOutOddSCBIM = (int16_t)inIm[i] - (int16_t)inIm[i+4];
-                int16_t WInRE = (int16_t)wRe[i];
-                int16_t WInIM = (int16_t)wIm[i];
+                int16_t WInRE = (int16_t)wRe[2*i];
+                int16_t WInIM = (int16_t)wIm[2*i];
                 int64_t interOddRE3 = ((dataOutOddSCBRE>>1)*WInRE -  (dataOutOddSCBIM>>1)*WInIM);
                 int64_t interOddIM3 = ((dataOutOddSCBRE>>1)*WInIM +  (dataOutOddSCBIM>>1)*WInRE);
 

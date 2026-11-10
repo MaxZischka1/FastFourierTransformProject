@@ -10,21 +10,21 @@
 
 bool tb_called = false;
 
-int sclkPeriod = 176;
-std::vector<int> dataIn     = {0,0,0,0,0,0,
-                                1,1,1,1,1,1,1,0,1,1,0,1, 
+int sclkPeriod = 187;
+std::vector<int> dataIn     = {0,0,0,0,0,
+                                1,1,1,1,1,1,1,0,1,1,0,1,
                                  0,0,
-                                0,0,0,0,0,0,
-                                1,1,0,1,1,1,1,0,1,1,1,1, 
+                                0,0,0,0,0,
+                                1,1,0,1,1,1,1,0,1,1,1,1,
                                  0,0};
-std::vector<int> resetN     = {0,1,1,1,1,1,
+std::vector<int> resetN     = {0,1,1,1,1,
                                 1,1,1,1,1,1,1,1,1,1,1,1,
                                  1,1,
-                                0,1,1,1,1,1,
+                                0,1,1,1,1,
                                 1,1,1,1,1,1,1,1,1,1,1,1,
                                  1,1};
-std::vector<int> startTrans = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                               1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; //probably how it is implemented for Audio Equil
+std::vector<int> startTrans = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                               1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}; //probably how it is implemented for Audio Equil
 
 int main_cycles = dataIn.size();
 
