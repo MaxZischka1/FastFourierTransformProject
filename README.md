@@ -4,3 +4,9 @@ This build is for a 4 stage FFT but this can obviously be built up to N with a f
 Signal chain: the MCP3201 is read at 8 kSPS (24 MHz / 187 / 16), every 16 samples go through the FFT, and bins 1 to 8 (500 Hz to 4 kHz) are shown as one column each. Each LED in a column is double the magnitude of the one below it. Bars jump up straight away and fall one LED every decayFrames FFT frames (32 by default, about 64 ms per LED). Between columns everything is switched off for readDivCount/16 clocks so the 2N3904 column drivers can turn off fully and the previous column doesn't ghost.
 
 Video:
+
+https://github.com/user-attachments/assets/a05e287f-1762-4381-a237-b69075709cc5
+
+Board Setup:
+
+<img width="1932" height="1933" alt="d4bcff0e-2ac7-4c49-a855-90eca75db59b" src="https://github.com/user-attachments/assets/0ee0878f-e3e5-4d81-acd6-1174fde27027" />
