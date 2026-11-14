@@ -73,7 +73,7 @@ uint8_t model(MTBTxIn *in){
     uint16_t mx = (re > im) ? re : im;
     uint16_t mn = (re > im) ? im : re;
     uint16_t mag = (uint16_t)(mx + (mn >> 1));
-    return (mag & 0x8000) ? 0xFF : (uint8_t)(mag >> 7);
+    return (mag & 0xE000) ? 0xFF : (uint8_t)(mag >> 5);
 }
 
 std::deque<MTBTxIn*> TxMTBGen(){

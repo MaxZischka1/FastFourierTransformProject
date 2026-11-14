@@ -12,7 +12,7 @@
 
 bool tb_called = false;
 
-int sclkPeriod = 187;    //clk cycles in one sclk period, same as internalCount in adcSpi
+int sclkPeriod = 187;
 int framePeriods = 16;   //sclk periods adcSpi spends on one sample
 int framePulses = 15;    //sclk pulses in those periods, the arm period holds sclk low
 int frameSize = 16;      //samples in one FFT frame
@@ -71,7 +71,7 @@ void ValToOutput(std::vector<int> vals, std::vector<int16_t> &re, std::vector<in
     re.resize(n);
     im.resize(n);
     for(int s = 0; s < n; s++){
-        re[s] = (int16_t)((vals[s] ^ 0x800) << 4);   //top.sv pads the 12 bit sample with 4 zero LSBs
+        re[s] = (int16_t)(vals[s] - 0x800);
         im[s] = 0;
     }
     for(int i = n; i >= 2; i /= 2){
@@ -109,7 +109,7 @@ uint8_t OutputToBin(int16_t re, int16_t im){
     uint16_t mx = (a > b) ? a : b;
     uint16_t mn = (a > b) ? b : a;
     uint16_t mag = (uint16_t)(mx + (mn >> 1));
-    return (mag & 0x8000) ? 0xFF : (uint8_t)(mag >> 7);
+    return (mag & 0xE000) ? 0xFF : (uint8_t)(mag >> 5);
 }
 
 int magToLevel(uint8_t mag){

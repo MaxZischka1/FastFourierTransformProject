@@ -30,7 +30,7 @@ always_ff @(posedge clk) begin
 
 end
 
-assign MagOut = MagOut17[15] ? 8'hFF : MagOut17[14:7];
+assign MagOut = MagOut17[15] ? 8'hFF : MagOut17[10:4]; //for sensitivity with the video
 
 assign validO = validPipe[2];
 

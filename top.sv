@@ -38,10 +38,53 @@ logic fifoValid;
 fifo #(.width(12), .depth(16)) sampleFifo(.clock(clk), .clr(!rstN), .write(sampleValid),
     .dataIn(sample), .dataOut(fifoOut), .valid(fifoValid));
 
+// logic [3:0] winIdx;
+// always_ff @(posedge clk) begin
+//     if(!rstN) winIdx <= '0;
+//     else if(fifoValid) winIdx <= winIdx + 1'b1;
+// end
+
+// logic [3:0] winPos;
+// assign winPos = winIdx[3] ? -winIdx : winIdx;
+
+// logic [8:0] winCoeff;
+// always_comb begin
+//     case(winPos)
+//         4'd1: winCoeff = 9'd10;
+//         4'd2: winCoeff = 9'd37;
+//         4'd3: winCoeff = 9'd79;
+//         4'd4: winCoeff = 9'd128;
+//         4'd5: winCoeff = 9'd177;
+//         4'd6: winCoeff = 9'd219;
+//         4'd7: winCoeff = 9'd246;
+//         4'd8: winCoeff = 9'd256;
+//         default: winCoeff = 9'd0;
+//     endcase
+// end
+
+// logic [8:0] winCoeffReg;
+// logic signed [15:0] centered;
+// logic centeredValid;
+// always_ff @(posedge clk) begin
+//     winCoeffReg <= winCoeff;
+//     centered <= {~fifoOut[11], fifoOut[10:0], 4'd0};
+//     centeredValid <= fifoValid;
+// end
+
+// logic signed [25:0] windowProduct;
+// assign windowProduct = centered * $signed({1'b0, winCoeffReg});
+
+// logic signed [15:0] windowed;
+// logic windowedValid;
+// always_ff @(posedge clk) begin
+//     windowed <= windowProduct[23:8];
+//     windowedValid <= centeredValid;
+// end
+
 logic signed [15:0] fftOutRE, fftOutIM;
 logic fftValid;
 
-TopLevel fft(.dataInRE({~fifoOut[11], fifoOut[10:0], 4'd0}), .dataInIM(16'sd0), .clk(clk),
+TopLevel fft(.dataInRE({{4{~fifoOut[11]}}, ~fifoOut[11], fifoOut[10:0]}), .dataInIM(16'sd0), .clk(clk),
     .valid(fifoValid), .reset(rstN), .dataOutRE(fftOutRE), .dataOutIM(fftOutIM), .validOut(fftValid));
 
 logic [7:0] mag;

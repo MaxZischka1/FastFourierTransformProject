@@ -203,6 +203,10 @@ bitstream: top.bin
 top.bin: top.asc
 	icepack top.asc top.bin
 
+.PHONY: program
+program: top.bin
+	iceprog top.bin
+
 .PHONY: lint_top
 lint_top: $(TOP_SRCS) $(SB_MAC16_SIM)
 	verilator --lint-only $(WARN_FLAGS) -Wno-DECLFILENAME -Wno-CASEINCOMPLETE -sv $(TOP_SRCS) $(SB_MAC16_SIM) --top-module top
